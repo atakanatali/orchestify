@@ -2,9 +2,12 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Orchestify.Api;
-using Orchestify.Infrastructure.Logging;
+using Orchestify.Api.Middlewares;
 using Orchestify.Shared.Constants;
 using Serilog;
+
+// Import Infrastructure extension methods
+using Orchestify.Infrastructure;
 
 namespace Orchestify.Api;
 
@@ -19,20 +22,21 @@ public static class Program
     /// </summary>
     public static void Main(string[] args)
     {
-        // Configure Serilog before building the host
-        ConfigureSerilog();
-
         try
         {
-            Log.Information(LogServiceMessages.StartingApplication, LogConstants.ApiServiceName);
-
             var builder = WebApplication.CreateBuilder(args);
+
+            // Add infrastructure services
+            var services = builder.Services;
+            var configuration = builder.Configuration;
+
+            // Configure infrastructure using extension methods
+            services.AddSeriLogging(configuration);
+            services.AddDatabase(configuration);
+            services.AddCaching(configuration);
 
             // Use Serilog for logging
             builder.Host.UseSerilog();
-
-            // Add services to the container
-            var services = builder.Services;
 
             // Register middleware services (correlation ID, logging)
             services.AddMiddlewareServices();
@@ -72,22 +76,6 @@ public static class Program
             Log.CloseAndFlush();
         }
     }
-
-    /// <summary>
-    /// Configures Serilog with Console and Elasticsearch sinks.
-    /// </summary>
-    private static void ConfigureSerilog()
-    {
-        var elasticsearchUrl = Environment.GetEnvironmentVariable("Serilog__ElasticsearchUrl");
-        var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? Environments.Development;
-
-        var logger = SerilogConfiguration.CreateDefaultLogger(
-            LogConstants.ApiServiceName,
-            elasticsearchUrl ?? "http://localhost:9200",
-            environment);
-
-        Log.Logger = logger;
-    }
 }
 
 /// <summary>
@@ -95,11 +83,6 @@ public static class Program
 /// </summary>
 internal static class LogServiceMessages
 {
-    /// <summary>
-    /// Message template for application startup.
-    /// </summary>
-    public const string StartingApplication = "Starting {ServiceName} application";
-
     /// <summary>
     /// Message template for application started.
     /// </summary>

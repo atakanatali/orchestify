@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Orchestify.Api.Middlewares;
@@ -8,6 +9,7 @@ using Orchestify.Infrastructure.Logging;
 using Orchestify.Shared.Correlation;
 using Orchestify.Shared.Constants;
 using Orchestify.Shared.Logging;
+using Serilog;
 
 namespace Orchestify.Api;
 
@@ -128,5 +130,66 @@ public static class ServiceCollectionExtensions
         return services
             .AddCorrelationId()
             .AddLogService();
+    }
+
+    /// <summary>
+    /// Adds and configures Serilog logging with the specified settings.
+    /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <param name="configuration">The application configuration.</param>
+    /// <returns>The service collection for method chaining.</returns>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="services"/> or <paramref name="configuration"/> is null.
+    /// </exception>
+    public static IServiceCollection AddSeriLogging(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        if (services is null)
+        {
+            throw new ArgumentNullException(nameof(services));
+        }
+
+        if (configuration is null)
+        {
+            throw new ArgumentNullException(nameof(configuration));
+        }
+
+        // Bind configuration section to options entity
+        services.Configure<Orchestify.Infrastructure.Options.LoggingOptionsEntity>(
+            configuration.GetSection("Logging"));
+
+        // Validate and configure Serilog immediately with options
+        var loggingOptions = new Orchestify.Infrastructure.Options.LoggingOptionsEntity();
+        configuration.GetSection("Logging").Bind(loggingOptions);
+
+        if (loggingOptions.EnableElasticsearchSink && string.IsNullOrWhiteSpace(loggingOptions.ElasticsearchUrl))
+        {
+            throw new InvalidOperationException(
+                "Elasticsearch URL is required when Elasticsearch sink is enabled. " +
+                "Please configure the 'Logging:ElasticsearchUrl' value in appsettings.json.");
+        }
+
+        // Configure Serilog with options
+        var serilogOptions = new SerilogConfigurationOptions
+        {
+            ServiceName = loggingOptions.ServiceName,
+            Environment = loggingOptions.Environment,
+            MinimumLogLevel = loggingOptions.MinimumLogLevel,
+            EnableConsoleSink = loggingOptions.EnableConsoleSink,
+            EnableElasticsearchSink = loggingOptions.EnableElasticsearchSink,
+            ElasticsearchUrl = loggingOptions.ElasticsearchUrl,
+            IndexFormat = loggingOptions.IndexFormat,
+            IncludeAssemblyVersion = loggingOptions.IncludeAssemblyVersion,
+            MachineName = loggingOptions.MachineName,
+            ProcessId = loggingOptions.ProcessId
+        };
+
+        Log.Logger = SerilogConfiguration.Configure(serilogOptions).CreateLogger();
+
+        // Register options for DI
+        services.AddSingleton<Orchestify.Infrastructure.Options.LoggingOptionsEntity>(loggingOptions);
+
+        return services;
     }
 }
