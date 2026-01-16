@@ -9,8 +9,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Orchestify.Application\Orchestify.Application.csproj" />
+    <ProjectReference Include="..\Orchestify.Infrastructure\Orchestify.Infrastructure.csproj" />
     <ProjectReference Include="..\Orchestify.Shared\Orchestify.Shared.csproj" />
     <ProjectReference Include="..\Orchestify.Contracts\Orchestify.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Serilog.AspNetCore" />
   </ItemGroup>
 
 </Project>

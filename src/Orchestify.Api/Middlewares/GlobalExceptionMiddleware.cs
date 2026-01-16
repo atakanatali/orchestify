@@ -102,8 +102,7 @@ public sealed class GlobalExceptionMiddleware
             exception,
             ServiceError.Core.UnhandledError,
             "An unhandled exception occurred during request processing.",
-            logContext,
-            correlationId);
+            logContext);
 
         // Create the standardized error response
         ApiErrorResponseDto errorResponse = new(

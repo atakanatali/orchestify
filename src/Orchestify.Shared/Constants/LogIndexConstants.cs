@@ -72,4 +72,34 @@ public static class LogIndexConstants
     /// Use with: string.Format(QueueIndexFormat, date)
     /// </summary>
     public const string QueueIndexFormat = "logs-queue-{0:yyyy.MM.dd}";
+
+    /// <summary>
+    /// Index pattern for API logs.
+    /// Matches: logs-orchestify-api-*
+    /// </summary>
+    public const string ApiIndexPattern = "logs-orchestify-api-*";
+
+    /// <summary>
+    /// Index name format for API logs with date placeholder.
+    /// Use with: string.Format(ApiIndexFormat, date)
+    /// </summary>
+    public const string ApiIndexFormat = "logs-orchestify-api-{0:yyyy.MM.dd}";
+
+    /// <summary>
+    /// Index pattern for Worker logs.
+    /// Matches: logs-orchestify-worker-*
+    /// </summary>
+    public const string WorkerIndexPattern = "logs-orchestify-worker-*";
+
+    /// <summary>
+    /// Index name format for Worker logs with date placeholder.
+    /// Use with: string.Format(WorkerIndexFormat, date)
+    /// </summary>
+    public const string WorkerIndexFormat = "logs-orchestify-worker-{0:yyyy.MM.dd}";
+
+    /// <summary>
+    /// Wildcard pattern matching all Orchestify logs.
+    /// Use this in Kibana index patterns to query all application logs.
+    /// </summary>
+    public const string AllLogsPattern = "logs-*";
 }

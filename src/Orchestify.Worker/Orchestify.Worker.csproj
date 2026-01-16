@@ -9,10 +9,12 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="Serilog.AspNetCore" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Orchestify.Application\Orchestify.Application.csproj" />
+    <ProjectReference Include="..\Orchestify.Infrastructure\Orchestify.Infrastructure.csproj" />
     <ProjectReference Include="..\Orchestify.Shared\Orchestify.Shared.csproj" />
   </ItemGroup>
 

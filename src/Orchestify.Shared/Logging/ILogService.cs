@@ -8,58 +8,39 @@ namespace Orchestify.Shared.Logging;
 public interface ILogService
 {
     /// <summary>
-    /// Logs an informational message.
+    /// Logs an informational message with optional structured data.
     /// </summary>
+    /// <param name="code">A code identifying the type of log event (e.g., ORC_API_REQUEST_RECEIVED).</param>
     /// <param name="message">The message to log.</param>
-    /// <param name="context">Optional contextual data for log enrichment.</param>
-    /// <param name="correlationId">Optional correlation ID for request tracing.</param>
-    void Information(string message, IDictionary<string, object?>? context = null, string? correlationId = null);
+    /// <param name="data">Optional structured data for log enrichment.</param>
+    void Info(string code, string message, IDictionary<string, object?>? data = null);
 
     /// <summary>
-    /// Logs a warning message.
+    /// Logs a warning message with optional structured data.
     /// </summary>
+    /// <param name="code">A code identifying the type of warning (e.g., ORC_CACHE_MISS).</param>
     /// <param name="message">The warning message to log.</param>
-    /// <param name="context">Optional contextual data for log enrichment.</param>
-    /// <param name="correlationId">Optional correlation ID for request tracing.</param>
-    void Warning(string message, IDictionary<string, object?>? context = null, string? correlationId = null);
+    /// <param name="data">Optional structured data for log enrichment.</param>
+    void Warn(string code, string message, IDictionary<string, object?>? data = null);
 
     /// <summary>
-    /// Logs an error with full exception details.
+    /// Logs an error with full exception details including type, message, and stack trace.
     /// </summary>
     /// <param name="exception">The exception that occurred.</param>
-    /// <param name="errorCode">The error code for categorization (e.g., ORC_CORE_UNHANDLED_ERROR).</param>
+    /// <param name="code">The error code for categorization (e.g., ORC_CORE_UNHANDLED_ERROR).</param>
     /// <param name="message">A descriptive error message safe for client consumption.</param>
-    /// <param name="context">Optional contextual data for log enrichment.</param>
-    /// <param name="correlationId">Optional correlation ID for request tracing.</param>
+    /// <param name="data">Optional structured data for log enrichment.</param>
     void Error(
         Exception exception,
-        string errorCode,
+        string code,
         string message,
-        IDictionary<string, object?>? context = null,
-        string? correlationId = null);
+        IDictionary<string, object?>? data = null);
 
     /// <summary>
     /// Logs a debug-level message for development diagnostics.
     /// </summary>
+    /// <param name="code">A code identifying the debug event (e.g., ORC_DB_QUERY_EXECUTED).</param>
     /// <param name="message">The debug message to log.</param>
-    /// <param name="context">Optional contextual data for log enrichment.</param>
-    /// <param name="correlationId">Optional correlation ID for request tracing.</param>
-    void Debug(string message, IDictionary<string, object?>? context = null, string? correlationId = null);
-
-    /// <summary>
-    /// Creates a logging scope with additional context that applies to all log entries within.
-    /// Returns an IDisposable that ends the scope when disposed.
-    /// </summary>
-    /// <param name="context">The contextual data to add to the scope.</param>
-    /// <returns>An IDisposable that ends the scope when disposed.</returns>
-    IDisposable BeginScope(IDictionary<string, object?> context);
-
-    /// <summary>
-    /// Creates a logging scope with a named identifier and additional context.
-    /// Returns an IDisposable that ends the scope when disposed.
-    /// </summary>
-    /// <param name="scopeName">The name identifying this scope.</param>
-    /// <param name="context">The contextual data to add to the scope.</param>
-    /// <returns>An IDisposable that ends the scope when disposed.</returns>
-    IDisposable BeginScope(string scopeName, IDictionary<string, object?>? context = null);
+    /// <param name="data">Optional structured data for log enrichment.</param>
+    void Debug(string code, string message, IDictionary<string, object?>? data = null);
 }

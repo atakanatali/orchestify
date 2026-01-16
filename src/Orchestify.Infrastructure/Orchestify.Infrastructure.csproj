@@ -12,4 +12,13 @@
     <ProjectReference Include="..\Orchestify.Shared\Orchestify.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Serilog" />
+    <PackageReference Include="Serilog.Sinks.Console" />
+    <PackageReference Include="Serilog.Sinks.Elasticsearch" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
+  </ItemGroup>
+
 </Project>

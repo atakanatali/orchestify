@@ -4,7 +4,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Orchestify.Api.Middlewares;
 using Orchestify.Api.Services;
+using Orchestify.Infrastructure.Logging;
 using Orchestify.Shared.Correlation;
+using Orchestify.Shared.Constants;
 using Orchestify.Shared.Logging;
 
 namespace Orchestify.Api;
@@ -87,6 +89,7 @@ public static class ServiceCollectionExtensions
 
     /// <summary>
     /// Adds the logging service to the dependency injection container.
+    /// Uses Serilog-based implementation with correlation tracking.
     /// </summary>
     /// <param name="services">The service collection.</param>
     /// <returns>The service collection for method chaining.</returns>
@@ -100,7 +103,9 @@ public static class ServiceCollectionExtensions
             throw new ArgumentNullException(nameof(services));
         }
 
-        services.TryAddSingleton<ILogService, LogService>();
+        // Register correlation provider first for injection into log service
+        var correlationProvider = services.BuildServiceProvider().GetService<ICorrelationIdProvider>();
+        services.TryAddSingleton<ILogService>(sp => new SerilogLogService(LogConstants.ApiServiceName, sp.GetService<ICorrelationIdProvider>()));
 
         return services;
     }
