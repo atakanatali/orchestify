@@ -7,4 +7,8 @@
     <AssemblyName>Orchestify.Contracts</AssemblyName>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Orchestify.Shared\Orchestify.Shared.csproj" />
+  </ItemGroup>
+
 </Project>
