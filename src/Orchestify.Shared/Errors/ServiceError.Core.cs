@@ -95,5 +95,11 @@ public static partial class ServiceError
         /// Operation already processed with this idempotency key.
         /// </summary>
         public static string DuplicateOperation => FormatErrorCode(CoreDomain, "DUPLICATE_OPERATION");
+
+        /// <summary>
+        /// An unhandled exception occurred during request processing.
+        /// Used by the global exception middleware for generic exception capture.
+        /// </summary>
+        public static string UnhandledError => FormatErrorCode(CoreDomain, "UNHANDLED_ERROR");
     }
 }
