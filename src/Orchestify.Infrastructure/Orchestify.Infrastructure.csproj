@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Orchestify.Infrastructure</RootNamespace>
+    <AssemblyName>Orchestify.Infrastructure</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Orchestify.Domain\Orchestify.Domain.csproj" />
+    <ProjectReference Include="..\Orchestify.Shared\Orchestify.Shared.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Orchestify.Contracts</RootNamespace>
+    <AssemblyName>Orchestify.Contracts</AssemblyName>
+  </PropertyGroup>
+
+</Project>
