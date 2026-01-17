@@ -4,10 +4,14 @@ import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { workspacesApi, boardsApi, Board } from '@/lib/api';
-import { Plus, LayoutGrid, Loader2, MoreHorizontal, ListTodo, CheckCircle2 } from 'lucide-react';
+import { Plus, LayoutGrid, Loader2, MoreHorizontal, ListTodo, CheckCircle2, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import { CreateBoardModal } from '@/components/modals/CreateBoardModal';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 export default function WorkspacePage() {
     const { workspaceId } = useParams<{ workspaceId: string }>();
+    const [showCreateBoard, setShowCreateBoard] = useState(false);
 
     const { data: workspace } = useQuery({
         queryKey: ['workspace', workspaceId],
@@ -41,7 +45,10 @@ export default function WorkspacePage() {
                         {workspace?.workspace?.repositoryPath}
                     </p>
                 </div>
-                <button className="flex items-center gap-2 px-4 py-2.5 bg-[var(--primary)] text-white rounded-lg hover:bg-[var(--primary-dark)] transition-colors shadow-sm">
+                <button
+                    onClick={() => setShowCreateBoard(true)}
+                    className="flex items-center gap-2 px-4 py-2.5 bg-[var(--primary)] text-white rounded-lg hover:bg-[var(--primary-dark)] transition-colors shadow-sm"
+                >
                     <Plus size={18} />
                     New Board
                 </button>
@@ -54,7 +61,10 @@ export default function WorkspacePage() {
                 ))}
 
                 {/* Add Board Placeholder */}
-                <button className="border-2 border-dashed border-[var(--border)] rounded-xl p-6 flex flex-col items-center justify-center gap-3 hover:border-[var(--primary)] hover:bg-[var(--primary)] hover:bg-opacity-5 transition-all min-h-[200px] group">
+                <button
+                    onClick={() => setShowCreateBoard(true)}
+                    className="border-2 border-dashed border-[var(--border)] rounded-xl p-6 flex flex-col items-center justify-center gap-3 hover:border-[var(--primary)] hover:bg-[var(--primary)] hover:bg-opacity-5 transition-all min-h-[200px] group"
+                >
                     <div className="p-3 rounded-full bg-gray-100 group-hover:bg-[var(--primary)] group-hover:bg-opacity-10 transition-colors">
                         <Plus size={24} className="text-[var(--text-secondary)] group-hover:text-[var(--primary)]" />
                     </div>
@@ -63,11 +73,31 @@ export default function WorkspacePage() {
                     </span>
                 </button>
             </div>
+
+            {/* Modals */}
+            {showCreateBoard && (
+                <CreateBoardModal workspaceId={workspaceId} onClose={() => setShowCreateBoard(false)} />
+            )}
         </div>
     );
 }
 
 function BoardCard({ board, workspaceId }: { board: Board; workspaceId: string }) {
+    const queryClient = useQueryClient();
+    const deleteMutation = useMutation({
+        mutationFn: () => boardsApi.delete(workspaceId, board.id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['boards', workspaceId] });
+        }
+    });
+
+    const handleDelete = (e: React.MouseEvent) => {
+        e.preventDefault();
+        if (confirm(`Are you sure you want to delete board "${board.name}"?`)) {
+            deleteMutation.mutate();
+        }
+    };
+
     const progress = board.totalTasks > 0
         ? Math.round((board.completedTasks / board.totalTasks) * 100)
         : 0;
@@ -75,18 +105,27 @@ function BoardCard({ board, workspaceId }: { board: Board; workspaceId: string }
     return (
         <Link
             href={`/workspaces/${workspaceId}/boards/${board.id}`}
-            className="bg-white rounded-xl border border-[var(--border)] p-5 hover:shadow-lg hover:border-[var(--primary)] transition-all group"
+            className="bg-white rounded-xl border border-[var(--border)] p-5 hover:shadow-lg hover:border-[var(--primary)] transition-all group relative"
         >
             <div className="flex items-start justify-between mb-4">
                 <div className="p-2 rounded-lg bg-[var(--primary)] bg-opacity-10">
                     <LayoutGrid size={20} className="text-[var(--primary)]" />
                 </div>
-                <button
-                    onClick={(e) => { e.preventDefault(); }}
-                    className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-gray-100 transition-all"
-                >
-                    <MoreHorizontal size={18} className="text-[var(--text-secondary)]" />
-                </button>
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                    <button
+                        onClick={handleDelete}
+                        className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 transition-all disabled:opacity-50"
+                        disabled={deleteMutation.isPending}
+                    >
+                        <Trash2 size={18} />
+                    </button>
+                    <button
+                        onClick={(e) => { e.preventDefault(); }}
+                        className="p-1.5 rounded-lg hover:bg-gray-100 transition-all"
+                    >
+                        <MoreHorizontal size={18} className="text-[var(--text-secondary)]" />
+                    </button>
+                </div>
             </div>
 
             <h3 className="font-semibold text-[var(--text-primary)] mb-1 group-hover:text-[var(--primary)] transition-colors">
