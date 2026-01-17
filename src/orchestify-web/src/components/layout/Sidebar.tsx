@@ -3,13 +3,16 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { workspacesApi, Workspace } from '@/lib/api';
-import { LayoutDashboard, FolderKanban, Plus, Settings, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, FolderKanban, Plus, Settings, ChevronRight, Trash2 } from 'lucide-react';
 import clsx from 'clsx';
+import { CreateWorkspaceModal } from '@/components/modals/CreateWorkspaceModal';
 
 export function Sidebar() {
     const pathname = usePathname();
+    const [showCreateWorkspace, setShowCreateWorkspace] = useState(false);
     const { data: workspaces } = useQuery({
         queryKey: ['workspaces'],
         queryFn: workspacesApi.list,
@@ -34,7 +37,10 @@ export function Sidebar() {
                         <span className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
                             Workspaces
                         </span>
-                        <button className="p-1 hover:bg-gray-100 rounded transition-colors">
+                        <button
+                            onClick={() => setShowCreateWorkspace(true)}
+                            className="p-1 hover:bg-gray-100 rounded transition-colors"
+                        >
                             <Plus size={16} className="text-[var(--text-secondary)]" />
                         </button>
                     </div>
@@ -50,6 +56,11 @@ export function Sidebar() {
                     </div>
                 </div>
             </nav>
+
+            {/* Modals */}
+            {showCreateWorkspace && (
+                <CreateWorkspaceModal onClose={() => setShowCreateWorkspace(false)} />
+            )}
 
             {/* Footer */}
             <div className="p-3 border-t border-[var(--border)]">
@@ -77,11 +88,26 @@ function NavItem({ href, icon, label, active }: { href: string; icon: React.Reac
 }
 
 function WorkspaceItem({ workspace, isActive }: { workspace: Workspace; isActive: boolean }) {
+    const queryClient = useQueryClient();
+    const deleteMutation = useMutation({
+        mutationFn: () => workspacesApi.delete(workspace.id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['workspaces'] });
+        }
+    });
+
+    const handleDelete = (e: React.MouseEvent) => {
+        e.preventDefault();
+        if (confirm(`Are you sure you want to delete workspace "${workspace.name}"?`)) {
+            deleteMutation.mutate();
+        }
+    };
+
     return (
         <Link
             href={`/workspaces/${workspace.id}`}
             className={clsx(
-                'flex items-center gap-3 px-3 py-2 rounded-lg transition-all group',
+                'flex items-center gap-3 px-3 py-2 rounded-lg transition-all group relative',
                 isActive
                     ? 'bg-[var(--primary)] bg-opacity-10 text-[var(--primary)]'
                     : 'text-[var(--text-secondary)] hover:bg-gray-100'
@@ -89,7 +115,15 @@ function WorkspaceItem({ workspace, isActive }: { workspace: Workspace; isActive
         >
             <FolderKanban size={18} />
             <span className="flex-1 truncate font-medium">{workspace.name}</span>
-            <ChevronRight size={16} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="flex items-center gap-1">
+                <button
+                    onClick={handleDelete}
+                    className="p-1 hover:bg-red-100 text-red-500 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                    <Trash2 size={14} />
+                </button>
+                <ChevronRight size={16} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
         </Link>
     );
 }
