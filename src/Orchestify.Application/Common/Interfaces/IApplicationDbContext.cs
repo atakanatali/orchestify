@@ -34,6 +34,11 @@ public interface IApplicationDbContext
     DbSet<RunStepEntity> RunSteps { get; }
 
     /// <summary>
+    /// Settings table.
+    /// </summary>
+    DbSet<SettingEntity> Settings { get; }
+
+    /// <summary>
     /// Saves all changes to the database.
     /// </summary>
     /// <param name="cancellationToken">Cancellation token.</param>
