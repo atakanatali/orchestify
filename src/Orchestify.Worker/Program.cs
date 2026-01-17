@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Orchestify.Application.Common.Interfaces;
 using Orchestify.Infrastructure;
 using Orchestify.Infrastructure.Logging;
+using Orchestify.Infrastructure.Messaging;
 using Orchestify.Shared.Constants;
 using Orchestify.Shared.Logging;
 using Orchestify.Worker.Services;
@@ -34,6 +35,7 @@ public static class Program
                 {
                     // Register Infrastructure services (Database, etc.)
                     services.AddDatabase(context.Configuration);
+                    services.AddCaching(context.Configuration);
 
                     // Register the logging service
                     services.AddSingleton<ILogService>(sp =>
@@ -44,6 +46,12 @@ public static class Program
                     services.AddScoped<IStepExecutor, BuildStepExecutor>();
                     services.AddScoped<IStepExecutor, TestStepExecutor>();
                     services.AddScoped<IStepExecutor, ReviewStepExecutor>();
+
+                    // Add MassTransit with RabbitMQ and register the consumer
+                    services.AddMassTransitWithRabbitMq(context.Configuration, x =>
+                    {
+                        x.AddConsumer<Consumers.RunTaskConsumer>();
+                    });
 
                     // Register the background workers
                     services.AddHostedService<Worker>();
