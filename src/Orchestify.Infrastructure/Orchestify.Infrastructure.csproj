@@ -10,9 +10,11 @@
   <ItemGroup>
     <ProjectReference Include="..\Orchestify.Domain\Orchestify.Domain.csproj" />
     <ProjectReference Include="..\Orchestify.Shared\Orchestify.Shared.csproj" />
+    <ProjectReference Include="..\Orchestify.Application\Orchestify.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
     <PackageReference Include="Serilog" />
     <PackageReference Include="Serilog.Sinks.Console" />
     <PackageReference Include="Serilog.Sinks.Elasticsearch" />

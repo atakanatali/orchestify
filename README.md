@@ -41,6 +41,14 @@ The solution follows Clean Architecture principles with the following layers:
   - HResult
   - Custom exception data
 
+### Workspace Management
+
+Core capability to manage project boundaries:
+- **CRUD Operations**: Complete API for creating, reading, updating, and deleting workspaces
+- **Entity Tracking**: Tracks repository path, default branch, and task statistics
+- **DTOs**: Standardized data transfer objects for API communication
+
+
 ### Log Indices
 
 Logs are stored in Elasticsearch under the following patterns:

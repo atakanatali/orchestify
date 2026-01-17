@@ -3,6 +3,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Orchestify.Infrastructure.Options;
 using StackExchange.Redis;
+using Orchestify.Infrastructure.Persistence;
+using Orchestify.Application.Common.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace Orchestify.Infrastructure;
 
@@ -55,6 +58,17 @@ public static class ServiceCollectionExtensions
 
             return options;
         });
+
+        services.AddDbContext<ApplicationDbContext>((sp, options) =>
+        {
+            var dbOptions = sp.GetRequiredService<DatabaseOptionsEntity>();
+            options.UseNpgsql(dbOptions.ConnectionString, npgsqlOptions =>
+            {
+                npgsqlOptions.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName);
+            });
+        });
+
+        services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
 
         return services;
     }

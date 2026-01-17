@@ -25,7 +25,7 @@ Orchestify follows Clean Architecture principles with clear separation of concer
 
 **Orchestify.Application**
 - Use cases and business workflows
-- CQRS command/query handlers
+- CQRS command/query handlers (e.g., `CreateWorkspaceHandler`, `ListWorkspacesHandler`)
 - Application services
 - DTOs for data transfer
 - Validation logic
@@ -33,7 +33,7 @@ Orchestify follows Clean Architecture principles with clear separation of concer
 ### Domain Layer
 
 **Orchestify.Domain**
-- Core business entities
+- Core business entities (e.g., `WorkspaceEntity`)
 - Aggregates and value objects
 - Domain events
 - Business rules

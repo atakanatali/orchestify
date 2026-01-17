@@ -8,6 +8,7 @@ using Serilog;
 
 // Import Infrastructure extension methods
 using Orchestify.Infrastructure;
+using Orchestify.Application;
 
 namespace Orchestify.Api;
 
@@ -34,6 +35,7 @@ public static class Program
             services.AddSeriLogging(configuration);
             services.AddDatabase(configuration);
             services.AddCaching(configuration);
+            services.AddApplication();
 
             // Use Serilog for logging
             builder.Host.UseSerilog();
