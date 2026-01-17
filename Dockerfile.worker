@@ -1,0 +1,32 @@
+# Build stage
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+# Copy solution and project files
+COPY *.sln ./
+COPY Directory.Packages.props ./
+COPY src/Orchestify.Api/*.csproj ./src/Orchestify.Api/
+COPY src/Orchestify.Application/*.csproj ./src/Orchestify.Application/
+COPY src/Orchestify.Contracts/*.csproj ./src/Orchestify.Contracts/
+COPY src/Orchestify.Domain/*.csproj ./src/Orchestify.Domain/
+COPY src/Orchestify.Infrastructure/*.csproj ./src/Orchestify.Infrastructure/
+COPY src/Orchestify.Shared/*.csproj ./src/Orchestify.Shared/
+COPY src/Orchestify.Worker/*.csproj ./src/Orchestify.Worker/
+
+# Restore packages
+RUN dotnet restore
+
+# Copy source code
+COPY src/ ./src/
+
+# Build
+RUN dotnet build -c Release --no-restore
+
+# Publish Worker
+RUN dotnet publish src/Orchestify.Worker/Orchestify.Worker.csproj -c Release -o /app/worker --no-build
+
+# Runtime stage for Worker  
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS worker
+WORKDIR /app
+COPY --from=build /app/worker .
+ENTRYPOINT ["dotnet", "Orchestify.Worker.dll"]
