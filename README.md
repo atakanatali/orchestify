@@ -1,5 +1,8 @@
 # Orchestify
 
+[![CI](https://github.com/atakanatali/orchestify/actions/workflows/ci.yml/badge.svg)](https://github.com/atakanatali/orchestify/actions/workflows/ci.yml)
+[![Unit Tests](https://github.com/atakanatali/orchestify/actions/workflows/tests.yml/badge.svg)](https://github.com/atakanatali/orchestify/actions/workflows/tests.yml)
+
 AI-powered code orchestration platform for managing automated development workflows.
 
 ## Quick Start
