@@ -12,12 +12,17 @@ export interface LogLine {
 export function useLogs(attemptId: string | null) {
     const [logs, setLogs] = useState<LogLine[]>([]);
     const [status, setStatus] = useState<'connecting' | 'connected' | 'error' | 'closed'>('closed');
+    const [prevAttemptId, setPrevAttemptId] = useState<string | null>(attemptId);
     const eventSourceRef = useRef<EventSource | null>(null);
 
-    useEffect(() => {
+    // Adjust state during render when attemptId changes (recommended React pattern)
+    if (attemptId !== prevAttemptId) {
+        setPrevAttemptId(attemptId);
         setLogs([]);
         setStatus(attemptId ? 'connecting' : 'closed');
+    }
 
+    useEffect(() => {
         if (!attemptId) return;
 
         const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
