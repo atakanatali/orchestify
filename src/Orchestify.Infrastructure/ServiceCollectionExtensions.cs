@@ -71,6 +71,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
         services.AddScoped<IAttemptQueueService, Services.AttemptQueueService>();
         services.AddScoped<IStepPipelineService, Services.StepPipelineService>();
+        services.AddScoped<IGitService, Services.GitService>();
 
         return services;
     }
