@@ -33,6 +33,21 @@ public class GitService : IGitService
         return await RunGitAsync("log -1 --format=%H", repoPath, cancellationToken);
     }
 
+    public async Task<GitCommandResult> ListBranchesAsync(string repoPath, CancellationToken cancellationToken)
+    {
+        // List local and remote branches, clean output
+        return await RunGitAsync("branch -a --format=%(refname:short)", repoPath, cancellationToken);
+    }
+
+    public async Task<GitCommandResult> InitAsync(string repoPath, CancellationToken cancellationToken)
+    {
+        if (!Directory.Exists(repoPath))
+        {
+            Directory.CreateDirectory(repoPath);
+        }
+        return await RunGitAsync("init", repoPath, cancellationToken);
+    }
+
     private static async Task<GitCommandResult> RunGitAsync(string arguments, string? workingDirectory, CancellationToken cancellationToken)
     {
         var psi = new ProcessStartInfo

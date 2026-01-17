@@ -3,13 +3,13 @@
 [![CI](https://github.com/atakanatali/orchestify/actions/workflows/ci.yml/badge.svg)](https://github.com/atakanatali/orchestify/actions/workflows/ci.yml)
 [![Unit Tests](https://github.com/atakanatali/orchestify/actions/workflows/tests.yml/badge.svg)](https://github.com/atakanatali/orchestify/actions/workflows/tests.yml)
 
-**Orchestify** is an AI-powered code orchestration platform designed for high-performance automated development workflows. It runs locally, respects your privacy, and leverages Apple Silicon (Metal/GPU) for near-instant AI responses.
+**Orchestify** is an AI-powered code orchestration platform designed for high-performance automated development workflows. It runs locally via Docker, respects your privacy, and leverages hardware acceleration (Metal/GPU) for near-instant AI responses across macOS, Linux, and Windows (WSL2).
 
 ---
 
 ## ⚡ Quick Start
 
-Get the entire stack (API, Worker, Postgres, Redis, n8n, Ollama) up and running with a single command:
+Get the entire stack (Web UI, API, Worker, Postgres, Redis, n8n, Ollama) up and running with a single command:
 
 ```bash
 chmod +x scripts/up.sh
@@ -20,7 +20,7 @@ This script will:
 1. Verify host resources (RAM/VRAM check).
 2. Start the unified Docker stack.
 3. Automatically apply database migrations.
-4. Pull the required LLM models (Qwen 2.5 & DeepSeek).
+4. Pull and prepare the required LLM models (Qwen 2.5 & DeepSeek).
 
 ---
 
@@ -52,8 +52,9 @@ The system is configured via environment variables and `.env` files.
 | `RAM_LIMIT_GB` | Hardware RAM limit | `16` |
 | `STRICT_RAM_CHECK`| Fail-fast on low RAM | `true` |
 
-### Infrastructure (`docker-compose.yml`)
-- **API**: [http://localhost:5000](http://localhost:5000)
+### Infrastructure
+- **Web UI**: [http://localhost:3000](http://localhost:3000)
+- **API**: [http://localhost:5001](http://localhost:5001)
 - **n8n**: [http://localhost:5678](http://localhost:5678)
 - **Ollama**: [http://localhost:11434](http://localhost:11434)
 - **Postgres**: `localhost:5432` (User: `orchestify`, DB: `orchestify`)
@@ -67,21 +68,26 @@ The system is configured via environment variables and `.env` files.
 - `GET /api/attempts/{id}/stream` - Real-time thought process and terminal output stream.
 - **SignalR Hub**: `AgentThought`, `AgentTerminalAction`, `AgentMetrics`.
 
-###  Git & Workspace
+### 📂 Workspaces & Git
+- `GET /api/workspaces` - List workspaces.
+- `POST /api/workspaces/discovery` - Automatically find projects in your local directory.
 - `POST /api/workspaces/{id}/git/pull` - Sync code.
-- `POST /api/workspaces/{id}/build` - Compile project.
-- `POST /api/workspaces/{id}/build/test` - Run test suite.
+- `POST /api/workspaces/{id}/build` - Compile project and run tests.
 
----
+## ⚡ Hardware Acceleration & Optimization
 
-## 🍎 Apple Silicon Optimization
+Orchestify is designed to be cross-platform while squeezing maximum performance from your hardware:
 
-Orchestify is optimized for macOS:
-- **Metal/GPU Acceleration**: Ollama automatically detects and uses the neural engine.
-- **UDS (Unix Domain Sockets)**: High-speed local communication bypassing the network stack.
-- **Memory Protection**: Fail-fast logic prevents system freezes by checking available RAM before loading massive models.
+- **Apple Silicon (macOS)**: Automatically leverages the Neural Engine and Metal GPU via Ollama for extreme tokens-per-second.
+- **Linux/Windows (WSL2)**: Supports NVIDIA (CUDA) and AMD (ROCm) acceleration through the Dockerized Ollama engine.
+- **UDS (Unix Domain Sockets)**: High-speed, zero-network-overhead communication between the Worker and AI engine (available on macOS/Linux).
+- **Memory Protection**: Intelligent pre-launch checks prevent system freezes by validating available RAM/VRAM before loading large models.
 
----
+## Features
+- **AI-Powered Orchestration**: Integrated local AI for managing development tasks via chat.
+- **Automated Workflows**: Embedded n8n for visually designing complex automation flows.
+- **Real-time Monitoring**: Stream logs, terminal output, and AI thought processes directly to the dashboard.
+- **One-Click Setup**: Fully automated local environment orchestration.
 
 ## License
 MIT

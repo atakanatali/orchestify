@@ -33,7 +33,7 @@ Orchestify follows Clean Architecture principles with clear separation of concer
 ### Domain Layer
 
 **Orchestify.Domain**
-- Core business entities (e.g., `WorkspaceEntity`)
+- Core business entities (e.g., `WorkspaceEntity`, `TaskMessageEntity`)
 - Aggregates and value objects
 - Domain events
 - Business rules
@@ -43,11 +43,12 @@ Orchestify follows Clean Architecture principles with clear separation of concer
 
 **Orchestify.Infrastructure**
 - Data access (EF Core with PostgreSQL)
-- External service integrations
+- External service integrations (including n8n)
 - Messaging (MassTransit with RabbitMQ)
 - Logging (Serilog with Elasticsearch)
 - Caching (Redis)
 - Repository implementations
+- AI Agent Services (implementation of `IAgentService`)
 
 ### Cross-Cutting Concerns
 
@@ -157,6 +158,7 @@ Error logs include:
 | postgres | Primary database | 5432 |
 | redis | Caching layer | 6379 |
 | rabbitmq | Message broker | 5672, 15672 |
+| n8n | Workflow automation | 5678 |
 | orchestify-api | Web API | 5000 |
 | orchestify-worker | Background worker | - |
 

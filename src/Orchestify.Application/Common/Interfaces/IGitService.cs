@@ -12,6 +12,8 @@ public interface IGitService
     Task<GitCommandResult> CheckoutAsync(string repoPath, string branch, CancellationToken cancellationToken);
     Task<GitCommandResult> GetCurrentBranchAsync(string repoPath, CancellationToken cancellationToken);
     Task<GitCommandResult> GetLastCommitAsync(string repoPath, CancellationToken cancellationToken);
+    Task<GitCommandResult> ListBranchesAsync(string repoPath, CancellationToken cancellationToken);
+    Task<GitCommandResult> InitAsync(string repoPath, CancellationToken cancellationToken);
 }
 
 /// <summary>

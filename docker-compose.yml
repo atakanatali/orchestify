@@ -81,6 +81,8 @@ services:
       context: .
       dockerfile: infra/docker/Dockerfile.api
     container_name: orchestify-api
+    volumes:
+      - ./repos:/repos
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - Database__ConnectionString=Host=postgres;Port=5432;Database=orchestify;Username=orchestify;Password=orchestify_dev
@@ -104,6 +106,8 @@ services:
       context: .
       dockerfile: infra/docker/Dockerfile.worker
     container_name: orchestify-worker
+    volumes:
+      - ./repos:/repos
     environment:
       - Database__ConnectionString=Host=postgres;Port=5432;Database=orchestify;Username=orchestify;Password=orchestify_dev
       - Caching__ConnectionString=redis:6379
@@ -119,6 +123,21 @@ services:
       rabbitmq:
         condition: service_healthy
       ollama:
+        condition: service_started
+
+  web:
+    image: orchestify-web:latest
+    container_name: orchestify-web
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.web
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://localhost:5001
+    depends_on:
+      api:
         condition: service_started
 
 volumes:

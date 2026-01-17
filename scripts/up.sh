@@ -12,11 +12,22 @@ fi
 
 echo "🚀 Starting Orchestify Full Stack..."
 
+# 0. Infrastructure Prep
+mkdir -p repos
+
 # 1. Hardware Check
 echo "📊 Checking System Resources..."
-FREE_PAGES=$(vm_stat | grep "Pages free" | awk '{print $3}' | sed 's/\.//')
-INACTIVE_PAGES=$(vm_stat | grep "Pages inactive" | awk '{print $3}' | sed 's/\.//')
-FREE_RAM_GB=$(((FREE_PAGES + INACTIVE_PAGES) * 4096 / 1024 / 1024 / 1024))
+OS_TYPE=$(uname)
+
+if [ "$OS_TYPE" == "Darwin" ]; then
+    # macOS Memory Check
+    FREE_PAGES=$(vm_stat | grep "Pages free" | awk '{print $3}' | sed 's/\.//')
+    INACTIVE_PAGES=$(vm_stat | grep "Pages inactive" | awk '{print $3}' | sed 's/\.//')
+    FREE_RAM_GB=$(((FREE_PAGES + INACTIVE_PAGES) * 4096 / 1024 / 1024 / 1024))
+else
+    # Linux/WSL2 Memory Check
+    FREE_RAM_GB=$(free -g | awk '/^Mem:/{print $4}')
+fi
 
 echo "   Available RAM: ${FREE_RAM_GB}GB"
 if [ "$FREE_RAM_GB" -lt 2 ]; then
@@ -25,7 +36,7 @@ fi
 
 # 2. Start Containers
 echo "🐳 Starting Docker Containers (orchestify)..."
-docker-compose up -d
+docker-compose up -d --build
 
 # 3. Wait for Postgres
 echo "🐘 Waiting for PostgreSQL to be ready..."
@@ -64,6 +75,7 @@ fi
 echo ""
 echo "✨ Orchestify is up and running!"
 echo "------------------------------------------------"
+echo "Web UI:     http://localhost:3000"
 echo "API:        http://localhost:5001"
 echo "n8n:        http://localhost:5678"
 echo "Ollama:     http://localhost:11434"
