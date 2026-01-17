@@ -1,8 +1,10 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Orchestify.Infrastructure;
 using Orchestify.Infrastructure.Logging;
 using Orchestify.Shared.Constants;
 using Orchestify.Shared.Logging;
+using Orchestify.Worker.Services;
 using Serilog;
 
 namespace Orchestify.Worker;
@@ -28,12 +30,16 @@ public static class Program
                 .UseSerilog()
                 .ConfigureServices((context, services) =>
                 {
+                    // Register Infrastructure services (Database, etc.)
+                    services.AddDatabase(context.Configuration);
+
                     // Register the logging service
                     services.AddSingleton<ILogService>(sp =>
                         new SerilogLogService(LogConstants.WorkerServiceName));
 
-                    // Register the background worker
+                    // Register the background workers
                     services.AddHostedService<Worker>();
+                    services.AddHostedService<AttemptProcessorService>();
                 })
                 .Build();
 
