@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { dashboardApi } from '@/lib/api';
-import { LayoutGrid, CheckCircle2, Loader2, AlertCircle, FolderKanban, ListTodo } from 'lucide-react';
+import { CheckCircle2, Loader2, FolderKanban, ListTodo } from 'lucide-react';
 
 export default function DashboardPage() {
   const { data: stats, isLoading } = useQuery({
@@ -30,25 +30,21 @@ export default function DashboardPage() {
           title="Workspaces"
           value={stats?.totalWorkspaces ?? 0}
           icon={<FolderKanban className="text-[var(--primary)]" />}
-          color="primary"
         />
         <StatCard
           title="Total Tasks"
           value={stats?.totalTasks ?? 0}
           icon={<ListTodo className="text-[var(--secondary)]" />}
-          color="secondary"
         />
         <StatCard
           title="Completed"
           value={stats?.completedTasks ?? 0}
           icon={<CheckCircle2 className="text-[var(--success)]" />}
-          color="success"
         />
         <StatCard
           title="In Progress"
           value={stats?.inProgressTasks ?? 0}
           icon={<Loader2 className="text-[var(--warning)]" />}
-          color="warning"
         />
       </div>
 
@@ -76,7 +72,7 @@ export default function DashboardPage() {
   );
 }
 
-function StatCard({ title, value, icon, color }: { title: string; value: number; icon: React.ReactNode; color: string }) {
+function StatCard({ title, value, icon }: { title: string; value: number; icon: React.ReactNode }) {
   return (
     <div className="bg-white rounded-xl p-6 border border-[var(--border)] shadow-sm hover:shadow-md transition-shadow">
       <div className="flex items-center justify-between mb-3">

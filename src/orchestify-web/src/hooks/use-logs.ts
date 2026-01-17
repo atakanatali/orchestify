@@ -15,13 +15,11 @@ export function useLogs(attemptId: string | null) {
     const eventSourceRef = useRef<EventSource | null>(null);
 
     useEffect(() => {
-        if (!attemptId) {
-            setLogs([]);
-            setStatus('closed');
-            return;
-        }
+        setLogs([]);
+        setStatus(attemptId ? 'connecting' : 'closed');
 
-        setStatus('connecting');
+        if (!attemptId) return;
+
         const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
         const es = new EventSource(`${apiBase}/attempts/${attemptId}/stream`);
         eventSourceRef.current = es;

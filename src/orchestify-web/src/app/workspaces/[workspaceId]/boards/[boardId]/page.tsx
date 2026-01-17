@@ -3,7 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams } from 'next/navigation';
 import { boardsApi, tasksApi, Task } from '@/lib/api';
-import { Plus, Loader2, Play, MoreHorizontal, Clock, CheckCircle2, Circle, AlertCircle, Trash2, X } from 'lucide-react';
+import { Plus, Loader2, Play, MoreHorizontal, Trash2, X } from 'lucide-react';
 import clsx from 'clsx';
 import { useState } from 'react';
 import { CreateTaskModal } from '@/components/modals/CreateTaskModal';
@@ -128,7 +128,6 @@ export default function BoardPage() {
                     onDelete={() => {
                         if (confirm("Delete task?")) deleteMutation.mutate(selectedTask.id);
                     }}
-                    boardId={boardId}
                 />
             )}
 
@@ -272,7 +271,7 @@ function PriorityBadge({ priority }: { priority: number }) {
     );
 }
 
-function TaskDetailModal({ task, onClose, onDelete, boardId }: { task: Task; onClose: () => void; onDelete: () => void; boardId: string }) {
+function TaskDetailModal({ task, onClose, onDelete }: { task: Task; onClose: () => void; onDelete: () => void }) {
     return (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-[150]" onClick={onClose}>
             <div
