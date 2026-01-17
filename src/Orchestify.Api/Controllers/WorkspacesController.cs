@@ -50,7 +50,7 @@ public class WorkspacesController : ControllerBase
             return MapFailure(result);
         }
 
-        return CreatedAtAction(nameof(GetWorkspaceById), new { id = result.Value!.Workspace.Id }, result.Value);
+        return CreatedAtAction(nameof(GetWorkspaceById), new { workspaceId = result.Value!.Workspace.Id }, result.Value);
     }
 
     /// <summary>
