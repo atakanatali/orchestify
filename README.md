@@ -17,7 +17,7 @@ AI-powered code orchestration platform for managing automated development workfl
 
 ```bash
 # Start all services
-docker-compose up -d
+docker-compose -f infra/docker-compose.dev.yml up -d
 
 # Apply migrations
 dotnet ef database update --project src/Orchestify.Infrastructure --startup-project src/Orchestify.Api

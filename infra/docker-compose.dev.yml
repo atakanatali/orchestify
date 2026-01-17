@@ -29,8 +29,8 @@ services:
 
   api:
     build:
-      context: .
-      dockerfile: Dockerfile.api
+      context: ..
+      dockerfile: infra/docker/Dockerfile.api
     ports:
       - "5000:8080"
     environment:
@@ -45,8 +45,8 @@ services:
 
   worker:
     build:
-      context: .
-      dockerfile: Dockerfile.worker
+      context: ..
+      dockerfile: infra/docker/Dockerfile.worker
     environment:
       - Database__ConnectionString=Host=postgres;Port=5432;Database=orchestify;Username=orchestify;Password=orchestify_dev
       - Caching__ConnectionString=redis:6379
