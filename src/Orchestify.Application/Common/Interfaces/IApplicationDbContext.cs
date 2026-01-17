@@ -24,6 +24,11 @@ public interface IApplicationDbContext
     DbSet<TaskEntity> Tasks { get; }
 
     /// <summary>
+    /// Task Chat messages table.
+    /// </summary>
+    DbSet<TaskMessageEntity> TaskMessages { get; }
+
+    /// <summary>
     /// Attempts table.
     /// </summary>
     DbSet<AttemptEntity> Attempts { get; }

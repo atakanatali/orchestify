@@ -24,6 +24,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
     /// <inheritdoc />
     public DbSet<TaskEntity> Tasks => Set<TaskEntity>();
+    public DbSet<TaskMessageEntity> TaskMessages => Set<TaskMessageEntity>();
 
     /// <inheritdoc />
     public DbSet<AttemptEntity> Attempts => Set<AttemptEntity>();

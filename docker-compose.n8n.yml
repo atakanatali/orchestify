@@ -1,0 +1,28 @@
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: orchestify-n8n
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    volumes:
+      - ./n8n_data:/home/node/.n8n
+    environment:
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - WEBHOOK_URL=http://localhost:5678/
+      - GENERIC_TIMEZONE=Europe/Istanbul
+      - TZ=Europe/Istanbul
+      # Skip owner setup - go directly to editor
+      - N8N_USER_MANAGEMENT_DISABLED=true
+      # Allow embedding in iframe - bypass X-Frame-Options
+      - N8N_XFRAME_BYPASS=true
+      - N8N_EDITOR_BASE_URL=http://localhost:5678
+      - N8N_SECURE_COOKIE=false
+    networks:
+      - orchestify-network
+
+networks:
+  orchestify-network:
+    driver: bridge

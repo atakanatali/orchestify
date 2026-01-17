@@ -8,7 +8,9 @@ using Serilog;
 
 // Import Infrastructure extension methods
 using Orchestify.Infrastructure;
+using Orchestify.Infrastructure.Services;
 using Orchestify.Application;
+using Orchestify.Application.Common.Interfaces;
 
 namespace Orchestify.Api;
 
@@ -32,8 +34,9 @@ public static class Program
             var configuration = builder.Configuration;
 
             // Configure infrastructure using extension methods
-            services.AddSeriLogging(configuration);
-            services.AddDatabase(configuration);
+            services.AddScoped<IGitService, GitService>();
+            services.AddHttpClient<IAgentService, AntigravityAgentService>();
+            services.AddDatabase(builder.Configuration);
             services.AddCaching(configuration);
             services.AddApplication();
 
@@ -49,6 +52,18 @@ public static class Program
             // Add controllers
             services.AddControllers();
 
+            // Enable CORS
+            services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(builder =>
+                {
+                    builder.WithOrigins("http://localhost:3001", "http://localhost:3000")
+                           .AllowAnyMethod()
+                           .AllowAnyHeader()
+                           .AllowCredentials();
+                });
+            });
+
             var app = builder.Build();
 
             // IMPORTANT: Middleware registration order matters!
@@ -57,6 +72,8 @@ public static class Program
 
             // Global exception handling must come after correlation ID
             app.UseGlobalExceptionHandling();
+
+            app.UseCors();
 
             // Health check endpoint
             app.MapHealthChecks("/health");
