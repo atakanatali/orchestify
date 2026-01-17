@@ -4,6 +4,7 @@ using Orchestify.Application.Actions.Tasks.CreateTask;
 using Orchestify.Application.Actions.Tasks.DeleteTask;
 using Orchestify.Application.Actions.Tasks.GetTaskById;
 using Orchestify.Application.Actions.Tasks.ListTasks;
+using Orchestify.Application.Actions.Tasks.MoveTask;
 using Orchestify.Application.Actions.Tasks.UpdateTask;
 using Orchestify.Contracts.Shared;
 using Orchestify.Contracts.Tasks;
@@ -108,6 +109,30 @@ public class TasksController : ControllerBase
     public async Task<IActionResult> UpdateTask(Guid boardId, Guid taskId, [FromBody] UpdateTaskRequestDto request)
     {
         var command = new UpdateTaskCommand(taskId, request);
+        var result = await _mediator.Send(command);
+
+        if (result.IsFailure)
+        {
+            return MapFailure(result);
+        }
+
+        return Ok(result.Value);
+    }
+
+    /// <summary>
+    /// Moves a task to a new position or status (drag-and-drop).
+    /// </summary>
+    /// <param name="boardId">The board identifier.</param>
+    /// <param name="taskId">The task identifier.</param>
+    /// <param name="request">The move request.</param>
+    /// <returns>The updated task.</returns>
+    [HttpPatch("{taskId:guid}/move")]
+    [ProducesResponseType(typeof(TaskResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiErrorResponseDto), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiErrorResponseDto), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> MoveTask(Guid boardId, Guid taskId, [FromBody] MoveTaskRequestDto request)
+    {
+        var command = new MoveTaskCommand(taskId, request);
         var result = await _mediator.Send(command);
 
         if (result.IsFailure)
