@@ -26,6 +26,9 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<TaskEntity> Tasks => Set<TaskEntity>();
 
     /// <inheritdoc />
+    public DbSet<AttemptEntity> Attempts => Set<AttemptEntity>();
+
+    /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());

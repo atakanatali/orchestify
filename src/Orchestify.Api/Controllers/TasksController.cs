@@ -5,7 +5,9 @@ using Orchestify.Application.Actions.Tasks.DeleteTask;
 using Orchestify.Application.Actions.Tasks.GetTaskById;
 using Orchestify.Application.Actions.Tasks.ListTasks;
 using Orchestify.Application.Actions.Tasks.MoveTask;
+using Orchestify.Application.Actions.Tasks.RunTask;
 using Orchestify.Application.Actions.Tasks.UpdateTask;
+using Orchestify.Contracts.Attempts;
 using Orchestify.Contracts.Shared;
 using Orchestify.Contracts.Tasks;
 using Orchestify.Shared.Errors;
@@ -141,6 +143,28 @@ public class TasksController : ControllerBase
         }
 
         return Ok(result.Value);
+    }
+
+    /// <summary>
+    /// Triggers a task execution run.
+    /// </summary>
+    /// <param name="boardId">The board identifier.</param>
+    /// <param name="taskId">The task identifier.</param>
+    /// <returns>The created attempt (202 Accepted).</returns>
+    [HttpPost("{taskId:guid}/run")]
+    [ProducesResponseType(typeof(RunTaskResponseDto), StatusCodes.Status202Accepted)]
+    [ProducesResponseType(typeof(ApiErrorResponseDto), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> RunTask(Guid boardId, Guid taskId)
+    {
+        var command = new RunTaskCommand(taskId);
+        var result = await _mediator.Send(command);
+
+        if (result.IsFailure)
+        {
+            return MapFailure(result);
+        }
+
+        return AcceptedAtAction(nameof(GetTaskById), new { boardId, taskId }, result.Value);
     }
 
     /// <summary>
