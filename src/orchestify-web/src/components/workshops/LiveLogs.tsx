@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useLogs } from '@/hooks/use-logs';
-import { X, Maximize2, Minimize2, Terminal, Loader2, Play, Circle, ChevronRight } from 'lucide-react';
+import { X, Maximize2, Minimize2, Terminal, Loader2, Circle, ChevronRight } from 'lucide-react';
 import clsx from 'clsx';
 
 export function LiveLogs({

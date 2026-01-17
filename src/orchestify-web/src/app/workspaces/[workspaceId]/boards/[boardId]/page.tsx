@@ -3,9 +3,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams, useRouter } from 'next/navigation';
 import { boardsApi, tasksApi, Task } from '@/lib/api';
-import { Plus, Loader2, Play, MoreHorizontal, Trash2, X, FolderKanban, ChevronRight, Search, Users, Eye, Filter, LayoutDashboard, List, LayoutGrid, Star, Edit3 } from 'lucide-react';
+import { Plus, Loader2, Play, MoreHorizontal, Trash2, X, FolderKanban, ChevronRight, Search, Users, Eye, Filter, LayoutDashboard, List, LayoutGrid, Edit3 } from 'lucide-react';
 import clsx from 'clsx';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { CreateTaskModal } from '@/components/modals/CreateTaskModal';
 import { EditBoardModal } from '@/components/modals/EditBoardModal';
 import { EditTaskModal } from '@/components/modals/EditTaskModal';

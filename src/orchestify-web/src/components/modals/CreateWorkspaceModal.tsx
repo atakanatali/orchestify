@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { workspacesApi, discoveryApi, RepositoryInfo } from '@/lib/api';
-import { X, Loader2, Info, ChevronRight, GitBranch, FolderCheck, AlertCircle } from 'lucide-react';
+import { X, Loader2, ChevronRight, GitBranch, FolderCheck, AlertCircle, Plus } from 'lucide-react';
 import clsx from 'clsx';
 
 export function CreateWorkspaceModal({ onClose }: { onClose: () => void }) {
@@ -32,7 +32,7 @@ export function CreateWorkspaceModal({ onClose }: { onClose: () => void }) {
             const mainBranch = branches.find(b => b === 'main' || b === 'master') || branches[0];
             setBranch(mainBranch);
         }
-    }, [branches, branch]);
+    }, [branches]); // Removed branch from dependency to avoid cascading renders
 
     const mutation = useMutation({
         mutationFn: () => workspacesApi.create({
@@ -194,4 +194,3 @@ export function CreateWorkspaceModal({ onClose }: { onClose: () => void }) {
     );
 }
 
-import { Plus } from 'lucide-react';

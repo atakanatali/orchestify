@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { tasksApi } from '@/lib/api';
-import { X, Loader2, ChevronRight, ListTodo, AlignLeft } from 'lucide-react';
-import clsx from 'clsx';
+import { X, Loader2, ChevronRight, ListTodo, AlignLeft, Plus } from 'lucide-react';
 
 export function CreateTaskModal({ boardId, onClose }: { boardId: string; onClose: () => void }) {
     const [title, setTitle] = useState('');
@@ -116,4 +115,3 @@ export function CreateTaskModal({ boardId, onClose }: { boardId: string; onClose
     );
 }
 
-import { Plus } from 'lucide-react';

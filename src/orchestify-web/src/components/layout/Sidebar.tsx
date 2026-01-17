@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { workspacesApi, Workspace } from '@/lib/api';
-import { LayoutDashboard, Plus, Settings, ChevronRight, ChevronLeft, Trash2, Zap, FolderKanban } from 'lucide-react';
+import { LayoutDashboard, Plus, ChevronLeft, Trash2, Zap } from 'lucide-react';
 import clsx from 'clsx';
 import { CreateWorkspaceModal } from '@/components/modals/CreateWorkspaceModal';
 

@@ -8,7 +8,6 @@ import { Plus, LayoutGrid, Loader2, MoreHorizontal, ListTodo, CheckCircle2, Tras
 import { useState } from 'react';
 import { CreateBoardModal } from '@/components/modals/CreateBoardModal';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import clsx from 'clsx';
 
 export default function WorkspacePage() {
     const { workspaceId } = useParams<{ workspaceId: string }>();
