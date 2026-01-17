@@ -34,7 +34,7 @@ public static class Program
             var configuration = builder.Configuration;
 
             // Configure infrastructure using extension methods
-            services.AddDatabase(builder.Configuration);
+            services.AddScoped<IGitService, GitService>();
             services.AddDatabase(builder.Configuration);
             services.AddCaching(configuration);
             services.AddApplication();

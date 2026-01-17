@@ -35,7 +35,7 @@ graph TD
     Worker -- gRPC over UDS --> AI[Local Ollama Engine]
     Worker -- HTTP --> n8n[Workflow Automation]
     Worker -- EF Core --> DB[(PostgreSQL)]
-    AI -- Metal/GPU --> GPU[Apple Silicon]
+    AI -- Acceleration --> HW[GPU/NPU Acceleration]
 ```
 
 ---
