@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+option csharp_namespace = "Orchestify.Contracts.Protos";
+
+package agent;
+
+service AgentService {
+  // Bi-directional streaming for real-time interaction
+  rpc ExecuteTask (stream AgentRequest) returns (stream AgentResponse);
+}
+
+message AgentRequest {
+  string task_id = 1;
+  string prompt = 2;
+  map<string, string> context = 3;
+}
+
+message AgentResponse {
+  oneof payload {
+    ThoughtProcess thought = 1;
+    StepSignal signal = 2;
+    TerminalAction terminal = 3;
+    TextDelta delta = 4;
+    Metrics metrics = 5;
+    ErrorResponse error = 6;
+  }
+}
+
+message ThoughtProcess {
+  string content = 1;
+}
+
+message StepSignal {
+  enum Type {
+    STARTED = 0;
+    COMPLETED = 1;
+    FAILED = 2;
+  }
+  Type type = 1;
+  string step_name = 2;
+  string metadata = 3;
+}
+
+message TerminalAction {
+  string command = 1;
+  string output = 2;
+  int32 exit_code = 3;
+}
+
+message TextDelta {
+  string content = 1;
+}
+
+message Metrics {
+  double ttft_ms = 1;
+  double tokens_per_second = 2;
+  double ram_usage_gb = 3;
+  double vram_usage_gb = 4;
+}
+
+message ErrorResponse {
+  string code = 1;
+  string message = 2;
+}

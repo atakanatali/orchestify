@@ -1,0 +1,73 @@
+#!/bin/bash
+
+set -e
+
+# Load configurations
+if [ -f .env.llm ]; then
+    export $(grep -v '^#' .env.llm | xargs)
+else
+    echo "⚠️  Warning: .env.llm not found. Using default values."
+    export ACTIVE_MODEL="qwen2.5-coder:7b-instruct-q4_K_M"
+fi
+
+echo "🚀 Starting Orchestify Full Stack..."
+
+# 1. Hardware Check
+echo "📊 Checking System Resources..."
+FREE_PAGES=$(vm_stat | grep "Pages free" | awk '{print $3}' | sed 's/\.//')
+INACTIVE_PAGES=$(vm_stat | grep "Pages inactive" | awk '{print $3}' | sed 's/\.//')
+FREE_RAM_GB=$(((FREE_PAGES + INACTIVE_PAGES) * 4096 / 1024 / 1024 / 1024))
+
+echo "   Available RAM: ${FREE_RAM_GB}GB"
+if [ "$FREE_RAM_GB" -lt 2 ]; then
+    echo "⚠️  Low memory detected. Proceeding with caution..."
+fi
+
+# 2. Start Containers
+echo "🐳 Starting Docker Containers (orchestify)..."
+docker-compose up -d
+
+# 3. Wait for Postgres
+echo "🐘 Waiting for PostgreSQL to be ready..."
+until docker exec orchestify-postgres pg_isready -U orchestify > /dev/null 2>&1; do
+  echo -n "."
+  sleep 2
+done
+echo " Ready!"
+
+# 4. Apply Database Migrations
+echo "🏗️ Applying Database Migrations..."
+if command -v dotnet &> /dev/null; then
+    dotnet ef database update --project src/Orchestify.Infrastructure --startup-project src/Orchestify.Api
+else
+    echo "⚠️  dotnet SDK not found. Skipping migrations."
+fi
+
+# 5. Model Management
+echo "📥 Checking LLM Models..."
+# Ensure Ollama is ready to accept commands
+until curl -s http://localhost:11434/api/tags > /dev/null; do
+  echo -n "."
+  sleep 2
+done
+
+echo "   Ensuring active model: $ACTIVE_MODEL"
+docker exec -it orchestify-ollama ollama pull $ACTIVE_MODEL
+
+if [ ! -z "$WARM_MODELS" ]; then
+    for model in ${WARM_MODELS//,/ }; do
+        echo "   Ensuring warm model: $model"
+        docker exec -it orchestify-ollama ollama pull $model
+    done
+fi
+
+echo ""
+echo "✨ Orchestify is up and running!"
+echo "------------------------------------------------"
+echo "API:        http://localhost:5001"
+echo "n8n:        http://localhost:5678"
+echo "Ollama:     http://localhost:11434"
+echo "Postgres:   localhost:5432"
+echo "Redis:      localhost:6379"
+echo "------------------------------------------------"
+echo "Active AI Model: $ACTIVE_MODEL"

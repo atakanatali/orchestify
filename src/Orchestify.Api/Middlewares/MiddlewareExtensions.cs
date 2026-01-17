@@ -105,9 +105,9 @@ public static class ServiceCollectionExtensions
             throw new ArgumentNullException(nameof(services));
         }
 
-        // Register correlation provider first for injection into log service
-        var correlationProvider = services.BuildServiceProvider().GetService<ICorrelationIdProvider>();
-        services.TryAddSingleton<ILogService>(sp => new SerilogLogService(LogConstants.ApiServiceName, sp.GetService<ICorrelationIdProvider>()));
+        // Register the log service with lazy resolution of the correlation provider
+        services.TryAddSingleton<ILogService>(sp => 
+            new SerilogLogService(LogConstants.ApiServiceName, sp.GetService<ICorrelationIdProvider>()));
 
         return services;
     }

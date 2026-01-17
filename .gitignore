@@ -52,3 +52,11 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+# AI and Local Infrastructure
+models/
+infra/models/
+.env
+.env.llm
+scripts/up_output.png
+scripts/up.sh.bak

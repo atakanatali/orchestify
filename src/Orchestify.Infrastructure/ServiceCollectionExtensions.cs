@@ -59,20 +59,25 @@ public static class ServiceCollectionExtensions
             return options;
         });
 
-        services.AddDbContext<ApplicationDbContext>((sp, options) =>
+        var dbConnectionString = configuration.GetSection("Database")["ConnectionString"];
+        if (string.IsNullOrWhiteSpace(dbConnectionString))
         {
-            var dbOptions = sp.GetRequiredService<DatabaseOptionsEntity>();
-            options.UseNpgsql(dbOptions.ConnectionString, npgsqlOptions =>
+             throw new InvalidOperationException("Database connection string is missing.");
+        }
+
+        services.AddDbContext<ApplicationDbContext>(options =>
+        {
+            options.UseNpgsql(dbConnectionString, npgsqlOptions =>
             {
                 npgsqlOptions.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName);
             });
         });
 
-        services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
-        services.AddScoped<IAttemptQueueService, Services.AttemptQueueService>();
-        services.AddScoped<IStepPipelineService, Services.StepPipelineService>();
-        services.AddScoped<IGitService, Services.GitService>();
-        services.AddScoped<IProcessRunner, Services.ProcessRunner>();
+        services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
+
+        // AI Infrastructure Services
+        services.AddSingleton<Services.MetricsService>();
+        services.AddScoped<IAgentOrchestrator, Services.AgentOrchestrator>();
 
         return services;
     }

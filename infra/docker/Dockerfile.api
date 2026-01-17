@@ -1,28 +1,14 @@
-# Build stage
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copy solution and project files
-COPY *.sln ./
-COPY Directory.Packages.props ./
-COPY src/Orchestify.Api/*.csproj ./src/Orchestify.Api/
-COPY src/Orchestify.Application/*.csproj ./src/Orchestify.Application/
-COPY src/Orchestify.Contracts/*.csproj ./src/Orchestify.Contracts/
-COPY src/Orchestify.Domain/*.csproj ./src/Orchestify.Domain/
-COPY src/Orchestify.Infrastructure/*.csproj ./src/Orchestify.Infrastructure/
-COPY src/Orchestify.Shared/*.csproj ./src/Orchestify.Shared/
-COPY src/Orchestify.Worker/*.csproj ./src/Orchestify.Worker/
+# Copy all files (respecting .dockerignore)
+COPY . .
 
-# Restore packages
-RUN dotnet restore
+# Restore and Build
+RUN dotnet restore Orchestify.sln
+RUN dotnet build src/Orchestify.Api/Orchestify.Api.csproj -c Release --no-restore
 
-# Copy source code
-COPY src/ ./src/
-
-# Build
-RUN dotnet build -c Release --no-restore
-
-# Publish API
+# Publish
 RUN dotnet publish src/Orchestify.Api/Orchestify.Api.csproj -c Release -o /app/api --no-build
 
 # Runtime stage for API

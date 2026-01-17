@@ -1,0 +1,13 @@
+**/.git
+**/.vs
+**/.vscode
+**/bin
+**/obj
+**/models
+**/.DS_Store
+*.md
+infra/
+scripts/
+docker-compose.yml
+.env
+.env.llm

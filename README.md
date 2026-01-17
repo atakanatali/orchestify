@@ -1,117 +1,87 @@
-# Orchestify
+# Orchestify 🚀
 
 [![CI](https://github.com/atakanatali/orchestify/actions/workflows/ci.yml/badge.svg)](https://github.com/atakanatali/orchestify/actions/workflows/ci.yml)
 [![Unit Tests](https://github.com/atakanatali/orchestify/actions/workflows/tests.yml/badge.svg)](https://github.com/atakanatali/orchestify/actions/workflows/tests.yml)
 
-AI-powered code orchestration platform for managing automated development workflows.
+**Orchestify** is an AI-powered code orchestration platform designed for high-performance automated development workflows. It runs locally, respects your privacy, and leverages Apple Silicon (Metal/GPU) for near-instant AI responses.
 
-## Quick Start
+---
 
-### Prerequisites
-- .NET 8.0 SDK
-- Docker & Docker Compose
-- PostgreSQL 16+ (or use Docker)
-- Redis 7+ (or use Docker)
+## ⚡ Quick Start
 
-### Development with Docker
+Get the entire stack (API, Worker, Postgres, Redis, n8n, Ollama) up and running with a single command:
 
 ```bash
-# Start all services
-docker-compose -f infra/docker-compose.dev.yml up -d
-
-# Apply migrations
-dotnet ef database update --project src/Orchestify.Infrastructure --startup-project src/Orchestify.Api
+chmod +x scripts/up.sh
+./scripts/up.sh
 ```
 
-### Development without Docker
+This script will:
+1. Verify host resources (RAM/VRAM check).
+2. Start the unified Docker stack.
+3. Automatically apply database migrations.
+4. Pull the required LLM models (Qwen 2.5 & DeepSeek).
 
-1. Update connection strings in `appsettings.Development.json`
-2. Run the API:
-```bash
-cd src/Orchestify.Api
-dotnet run
+---
+
+## 🏗️ Core Architecture
+
+Orchestify follows Clean Architecture principles with a focus on low-latency inter-process communication.
+
+```mermaid
+graph TD
+    Client[Frontend UI] -- SignalR --> API[Orchestify API]
+    API -- MassTransit/RabbitMQ --> Worker[Orchestify Worker]
+    Worker -- gRPC over UDS --> AI[Local Ollama Engine]
+    Worker -- HTTP --> n8n[Workflow Automation]
+    Worker -- EF Core --> DB[(PostgreSQL)]
+    AI -- Metal/GPU --> GPU[Apple Silicon]
 ```
 
-3. Run the Worker:
-```bash
-cd src/Orchestify.Worker
-dotnet run
-```
+---
 
-## API Endpoints
+## 🛠️ Configuration
 
-### Workspaces
-- `GET /api/workspaces` - List workspaces
-- `POST /api/workspaces` - Create workspace
-- `GET /api/workspaces/{id}` - Get workspace
-- `PUT /api/workspaces/{id}` - Update workspace
-- `DELETE /api/workspaces/{id}` - Delete workspace
+The system is configured via environment variables and `.env` files.
 
-### Boards
-- `GET /api/workspaces/{workspaceId}/boards` - List boards
-- `POST /api/workspaces/{workspaceId}/boards` - Create board
-- `GET /api/workspaces/{workspaceId}/boards/{id}` - Get board
-- `PUT /api/workspaces/{workspaceId}/boards/{id}` - Update board
-- `DELETE /api/workspaces/{workspaceId}/boards/{id}` - Delete board
+### AI Configuration (`.env.llm`)
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `ACTIVE_MODEL` | Primary model for tasks | `qwen2.5-coder:7b-instruct-q4_K_M` |
+| `WARM_MODELS` | Models to keep in memory | `deepseek-coder-v2:16b-lite-instruct-q4_K_M` |
+| `RAM_LIMIT_GB` | Hardware RAM limit | `16` |
+| `STRICT_RAM_CHECK`| Fail-fast on low RAM | `true` |
 
-### Tasks
-- `GET /api/boards/{boardId}/tasks` - List tasks
-- `POST /api/boards/{boardId}/tasks` - Create task  
-- `GET /api/boards/{boardId}/tasks/{id}` - Get task
-- `PUT /api/boards/{boardId}/tasks/{id}` - Update task
-- `DELETE /api/boards/{boardId}/tasks/{id}` - Delete task
-- `PATCH /api/boards/{boardId}/tasks/{id}/move` - Move task
-- `POST /api/boards/{boardId}/tasks/{id}/run` - Run task
+### Infrastructure (`docker-compose.yml`)
+- **API**: [http://localhost:5000](http://localhost:5000)
+- **n8n**: [http://localhost:5678](http://localhost:5678)
+- **Ollama**: [http://localhost:11434](http://localhost:11434)
+- **Postgres**: `localhost:5432` (User: `orchestify`, DB: `orchestify`)
 
-### Attempts
-- `GET /api/tasks/{taskId}/attempts` - List attempts
-- `GET /api/tasks/{taskId}/attempts/{id}` - Get attempt
-- `POST /api/tasks/{taskId}/attempts/{id}/cancel` - Cancel attempt
-- `GET /api/tasks/{taskId}/attempts/{id}/steps` - List run steps
+---
 
-### System
-- `GET /api/health` - Health check
-- `GET /api/health/detailed` - Detailed health
-- `GET /api/dashboard/stats` - Dashboard statistics
-- `GET /api/settings` - List settings
-- `PUT /api/settings/{key}` - Upsert setting
+## 🔌 API Endpoints
 
-### Git & Build
-- `GET /api/workspaces/{id}/git/branch` - Get current branch
-- `POST /api/workspaces/{id}/git/pull` - Pull changes
-- `POST /api/workspaces/{id}/git/checkout` - Checkout branch
-- `POST /api/workspaces/{id}/build` - Build project
-- `POST /api/workspaces/{id}/build/restore` - Restore deps
-- `POST /api/workspaces/{id}/build/test` - Run tests
+### 🧠 AI & Orchestration
+- `POST /api/tasks/{id}/run` - Executes an AI-driven workflow.
+- `GET /api/attempts/{id}/stream` - Real-time thought process and terminal output stream.
+- **SignalR Hub**: `AgentThought`, `AgentTerminalAction`, `AgentMetrics`.
 
-### Real-time
-- `GET /api/attempts/{id}/stream` - SSE log stream
-- SignalR Hub: `/hubs/execution`
+###  Git & Workspace
+- `POST /api/workspaces/{id}/git/pull` - Sync code.
+- `POST /api/workspaces/{id}/build` - Compile project.
+- `POST /api/workspaces/{id}/build/test` - Run test suite.
 
-## Architecture
+---
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                        API Layer                         │
-│  Controllers → MediatR Handlers → Database              │
-├─────────────────────────────────────────────────────────┤
-│                    Application Layer                     │
-│  Commands/Queries, Validators, Pipeline Behaviors       │
-├─────────────────────────────────────────────────────────┤
-│                 Infrastructure Layer                     │
-│  EF Core, Queue Service, Git Service, Process Runner    │
-├─────────────────────────────────────────────────────────┤
-│                     Domain Layer                         │
-│  Entities, Enums, Value Objects                         │
-└─────────────────────────────────────────────────────────┘
-         │
-         ▼
-┌─────────────────────────────────────────────────────────┐
-│                    Worker Service                        │
-│  AttemptProcessor → StepPipeline → StepExecutors        │
-└─────────────────────────────────────────────────────────┘
-```
+## 🍎 Apple Silicon Optimization
+
+Orchestify is optimized for macOS:
+- **Metal/GPU Acceleration**: Ollama automatically detects and uses the neural engine.
+- **UDS (Unix Domain Sockets)**: High-speed local communication bypassing the network stack.
+- **Memory Protection**: Fail-fast logic prevents system freezes by checking available RAM before loading massive models.
+
+---
 
 ## License
-
 MIT

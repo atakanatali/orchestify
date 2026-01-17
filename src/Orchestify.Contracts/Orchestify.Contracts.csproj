@@ -8,6 +8,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Grpc.Tools" PrivateAssets="All" />
+    <PackageReference Include="Google.Protobuf" />
+    <PackageReference Include="Grpc.Net.Client" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="Protos\agent.proto" GrpcServices="Both" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Orchestify.Shared\Orchestify.Shared.csproj" />
   </ItemGroup>
 
