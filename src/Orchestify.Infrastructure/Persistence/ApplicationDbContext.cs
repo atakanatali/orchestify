@@ -23,6 +23,9 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<BoardEntity> Boards => Set<BoardEntity>();
 
     /// <inheritdoc />
+    public DbSet<TaskEntity> Tasks => Set<TaskEntity>();
+
+    /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
