@@ -19,6 +19,11 @@ public interface IApplicationDbContext
     DbSet<BoardEntity> Boards { get; }
 
     /// <summary>
+    /// Tasks table.
+    /// </summary>
+    DbSet<TaskEntity> Tasks { get; }
+
+    /// <summary>
     /// Saves all changes to the database.
     /// </summary>
     /// <param name="cancellationToken">Cancellation token.</param>
