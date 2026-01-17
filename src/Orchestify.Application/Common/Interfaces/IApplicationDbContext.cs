@@ -24,6 +24,11 @@ public interface IApplicationDbContext
     DbSet<TaskEntity> Tasks { get; }
 
     /// <summary>
+    /// Attempts table.
+    /// </summary>
+    DbSet<AttemptEntity> Attempts { get; }
+
+    /// <summary>
     /// Saves all changes to the database.
     /// </summary>
     /// <param name="cancellationToken">Cancellation token.</param>
