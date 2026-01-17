@@ -61,6 +61,26 @@ until curl -sf http://localhost:9200/_cluster/health > /dev/null 2>&1; do
 done
 echo " Ready!"
 
+# 4.6 Wait for Kibana and create data view
+echo "📊 Configuring Kibana data view..."
+until curl -sf http://localhost:5601/api/status > /dev/null 2>&1; do
+  echo -n "."
+  sleep 3
+done
+echo " Kibana ready!"
+
+# Create data view for orchestify-logs-*
+curl -sf -X POST "http://localhost:5601/api/data_views/data_view" \
+  -H "kbn-xsrf: true" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "data_view": {
+      "title": "orchestify-logs-*",
+      "name": "Orchestify Logs",
+      "timeFieldName": "@timestamp"
+    }
+  }' > /dev/null 2>&1 && echo "   Data view 'orchestify-logs-*' created!" || echo "   Data view already exists or skipped."
+
 # 5. Model Management
 echo "📥 Checking LLM Models..."
 # Ensure Ollama is ready to accept commands
