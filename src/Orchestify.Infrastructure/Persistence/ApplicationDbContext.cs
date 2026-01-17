@@ -29,6 +29,9 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<AttemptEntity> Attempts => Set<AttemptEntity>();
 
     /// <inheritdoc />
+    public DbSet<RunStepEntity> RunSteps => Set<RunStepEntity>();
+
+    /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());

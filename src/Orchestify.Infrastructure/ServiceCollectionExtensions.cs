@@ -70,6 +70,7 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
         services.AddScoped<IAttemptQueueService, Services.AttemptQueueService>();
+        services.AddScoped<IStepPipelineService, Services.StepPipelineService>();
 
         return services;
     }

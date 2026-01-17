@@ -29,6 +29,11 @@ public interface IApplicationDbContext
     DbSet<AttemptEntity> Attempts { get; }
 
     /// <summary>
+    /// RunSteps table.
+    /// </summary>
+    DbSet<RunStepEntity> RunSteps { get; }
+
+    /// <summary>
     /// Saves all changes to the database.
     /// </summary>
     /// <param name="cancellationToken">Cancellation token.</param>
