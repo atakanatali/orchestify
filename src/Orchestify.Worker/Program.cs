@@ -1,10 +1,12 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Orchestify.Application.Common.Interfaces;
 using Orchestify.Infrastructure;
 using Orchestify.Infrastructure.Logging;
 using Orchestify.Shared.Constants;
 using Orchestify.Shared.Logging;
 using Orchestify.Worker.Services;
+using Orchestify.Worker.StepExecutors;
 using Serilog;
 
 namespace Orchestify.Worker;
@@ -36,6 +38,13 @@ public static class Program
                     // Register the logging service
                     services.AddSingleton<ILogService>(sp =>
                         new SerilogLogService(LogConstants.WorkerServiceName));
+
+                    // Register step executors
+                    services.AddScoped<IStepExecutor, RestoreStepExecutor>();
+                    services.AddScoped<IStepExecutor, BuildStepExecutor>();
+                    services.AddScoped<IStepExecutor, TestStepExecutor>();
+                    services.AddScoped<IStepExecutor, AgentStepExecutor>();
+                    services.AddScoped<IStepExecutor, ReviewStepExecutor>();
 
                     // Register the background workers
                     services.AddHostedService<Worker>();
