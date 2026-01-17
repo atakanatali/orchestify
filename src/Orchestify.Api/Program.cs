@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Orchestify.Api;
@@ -28,6 +29,35 @@ public static class Program
     {
         try
         {
+            // Bootstrap Serilog before anything else
+            var bootstrapConfig = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", optional: true)
+                .AddEnvironmentVariables()
+                .Build();
+
+            var esUrl = bootstrapConfig["Logging:Elasticsearch:Url"] ?? "http://localhost:9200";
+            var enableEs = bootstrapConfig.GetValue<bool>("Logging:EnableElasticsearchSink");
+
+            var loggerConfig = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .Enrich.FromLogContext()
+                .Enrich.WithProperty("ServiceName", LogConstants.ApiServiceName)
+                .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{ServiceName}] {Message:lj}{NewLine}{Exception}");
+
+            if (enableEs)
+            {
+                loggerConfig.WriteTo.Elasticsearch(new Serilog.Sinks.Elasticsearch.ElasticsearchSinkOptions(new Uri(esUrl))
+                {
+                    AutoRegisterTemplate = true,
+                    IndexFormat = "orchestify-logs-{0:yyyy.MM.dd}",
+                    NumberOfShards = 1,
+                    NumberOfReplicas = 0
+                });
+            }
+
+            Log.Logger = loggerConfig.CreateLogger();
+            Log.Information("Serilog initialized. Elasticsearch sink enabled: {EsEnabled}", enableEs);
+
             var builder = WebApplication.CreateBuilder(args);
 
             // Add infrastructure services
