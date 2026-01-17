@@ -3,6 +3,8 @@
 [![CI](https://github.com/atakanatali/orchestify/actions/workflows/ci.yml/badge.svg)](https://github.com/atakanatali/orchestify/actions/workflows/ci.yml)
 [![Unit Tests](https://github.com/atakanatali/orchestify/actions/workflows/tests.yml/badge.svg)](https://github.com/atakanatali/orchestify/actions/workflows/tests.yml)
 
+![Image](https://github.com/user-attachments/assets/dc75eac5-6891-4f99-8a2d-f06fd3a2d2e3)
+
 **Orchestify** is an AI-powered code orchestration platform designed for high-performance automated development workflows. It runs locally via Docker, respects your privacy, and leverages hardware acceleration (Metal/GPU) for near-instant AI responses across macOS, Linux, and Windows (WSL2).
 
 ---
