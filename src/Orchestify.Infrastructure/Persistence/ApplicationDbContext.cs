@@ -32,6 +32,9 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<RunStepEntity> RunSteps => Set<RunStepEntity>();
 
     /// <inheritdoc />
+    public DbSet<SettingEntity> Settings => Set<SettingEntity>();
+
+    /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
