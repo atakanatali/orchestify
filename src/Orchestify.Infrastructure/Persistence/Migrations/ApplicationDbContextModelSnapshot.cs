@@ -167,38 +167,6 @@ namespace Orchestify.Infrastructure.Persistence.Migrations
                     b.ToTable("RunSteps", (string)null);
                 });
 
-            modelBuilder.Entity("Orchestify.Domain.Entities.SettingEntity", b =>
-                {
-                    b.Property<string>("Key")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<bool>("IsSecret")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Value")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Key");
-
-                    b.HasIndex("Category");
-
-                    b.ToTable("Settings", (string)null);
-                });
-
             modelBuilder.Entity("Orchestify.Domain.Entities.TaskEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -247,35 +215,6 @@ namespace Orchestify.Infrastructure.Persistence.Migrations
                     b.HasIndex("BoardId", "Status");
 
                     b.ToTable("Tasks", (string)null);
-                });
-
-            modelBuilder.Entity("Orchestify.Domain.Entities.TaskMessageEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("Sender")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("SuggestedAction")
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("TaskId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TaskId");
-
-                    b.ToTable("TaskMessages");
                 });
 
             modelBuilder.Entity("Orchestify.Domain.Entities.WorkspaceEntity", b =>
@@ -364,17 +303,6 @@ namespace Orchestify.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Board");
-                });
-
-            modelBuilder.Entity("Orchestify.Domain.Entities.TaskMessageEntity", b =>
-                {
-                    b.HasOne("Orchestify.Domain.Entities.TaskEntity", "Task")
-                        .WithMany()
-                        .HasForeignKey("TaskId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Task");
                 });
 #pragma warning restore 612, 618
         }
