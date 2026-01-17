@@ -35,6 +35,9 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<SettingEntity> Settings => Set<SettingEntity>();
 
     /// <inheritdoc />
+    public DbSet<TaskMessageEntity> TaskMessages => Set<TaskMessageEntity>();
+
+    /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());

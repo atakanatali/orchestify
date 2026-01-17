@@ -39,6 +39,11 @@ public interface IApplicationDbContext
     DbSet<SettingEntity> Settings { get; }
 
     /// <summary>
+    /// Task messages table (AI chat history).
+    /// </summary>
+    DbSet<TaskMessageEntity> TaskMessages { get; }
+
+    /// <summary>
     /// Saves all changes to the database.
     /// </summary>
     /// <param name="cancellationToken">Cancellation token.</param>

@@ -9,8 +9,7 @@ import { useState } from 'react';
 import { CreateTaskModal } from '@/components/modals/CreateTaskModal';
 import { EditBoardModal } from '@/components/modals/EditBoardModal';
 import { EditTaskModal } from '@/components/modals/EditTaskModal';
-import { LiveLogs } from '@/components/workshops/LiveLogs';
-import { TaskChat } from '@/components/workshops/TaskChat';
+import { TaskOrchestrationModal } from '@/components/modals/TaskOrchestrationModal';
 
 const COLUMNS = [
     { id: 'Todo', title: 'To-do', color: 'bg-slate-400', textColor: 'text-white', borderColor: 'border-slate-400' },
@@ -29,7 +28,7 @@ export default function BoardPage() {
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
     const [showCreateTask, setShowCreateTask] = useState(false);
     const [viewMode, setViewMode] = useState<'Kanban' | 'Table'>('Kanban');
-    const [activeAttempt, setActiveAttempt] = useState<{ id: string; title: string } | null>(null);
+    const [orchestratingTask, setOrchestratingTask] = useState<Task | null>(null);
     const [showBoardMenu, setShowBoardMenu] = useState(false);
     const [showEditBoard, setShowEditBoard] = useState(false);
     const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -49,14 +48,7 @@ export default function BoardPage() {
 
     const runMutation = useMutation({
         mutationFn: (taskId: string) => tasksApi.run(boardId as string, taskId),
-        onSuccess: (data, taskId) => {
-            const task = tasks?.items?.find(t => t.id === taskId);
-            if (data.attempt) {
-                setActiveAttempt({
-                    id: data.attempt.id,
-                    title: task?.title || 'Unknown Task'
-                });
-            }
+        onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['tasks', boardId] });
         },
         onError: (error) => {
@@ -253,7 +245,10 @@ export default function BoardPage() {
                                 key={column.id}
                                 column={column}
                                 tasks={tasksByStatus[column.id]}
-                                onRunTask={(taskId) => runMutation.mutate(taskId)}
+                                onRunTask={(taskId) => {
+                                    const task = tasks?.items?.find(t => t.id === taskId);
+                                    if (task) setOrchestratingTask(task);
+                                }}
                                 onDeleteTask={(taskId) => {
                                     if (confirm("Delete task?")) deleteMutation.mutate(taskId);
                                 }}
@@ -271,7 +266,10 @@ export default function BoardPage() {
                                 column={column}
                                 tasks={tasksByStatus[column.id]}
                                 onSelectTask={setSelectedTask}
-                                onRunTask={(taskId) => runMutation.mutate(taskId)}
+                                onRunTask={(taskId) => {
+                                    const task = tasks?.items?.find(t => t.id === taskId);
+                                    if (task) setOrchestratingTask(task);
+                                }}
                                 onUpdateStatus={(taskId, status) => updateStatusMutation.mutate({ taskId, status })}
                             />
                         ))}
@@ -279,23 +277,11 @@ export default function BoardPage() {
                 )}
             </div>
 
-            {/* Modals */}
-            {selectedTask && (
-                <TaskDetailModal
-                    task={selectedTask}
-                    onClose={() => setSelectedTask(null)}
-                />
-            )}
-
-            {showCreateTask && (
-                <CreateTaskModal boardId={boardId as string} onClose={() => setShowCreateTask(false)} />
-            )}
-
-            {activeAttempt && (
-                <LiveLogs
-                    attemptId={activeAttempt.id}
-                    taskTitle={activeAttempt.title}
-                    onClose={() => setActiveAttempt(null)}
+            {orchestratingTask && (
+                <TaskOrchestrationModal
+                    task={orchestratingTask}
+                    boardId={boardId as string}
+                    onClose={() => setOrchestratingTask(null)}
                 />
             )}
 
@@ -560,51 +546,6 @@ function TableViewSection({
                         )}
                     </tbody>
                 </table>
-            </div>
-        </div>
-    );
-}
-
-function TaskDetailModal({ task, onClose }: { task: Task; onClose: () => void }) {
-    return (
-        <div className="fixed inset-0 bg-slate-900/90 backdrop-blur-[16px] flex items-center justify-center z-[150] p-6" onClick={onClose}>
-            <div
-                className="bg-white rounded-[40px] w-full max-w-6xl h-[85vh] overflow-hidden shadow-[0_40px_80px_rgba(0,0,0,0.6)] flex animate-in slide-in-from-bottom-20 duration-500 border border-slate-200"
-                onClick={(e) => e.stopPropagation()}
-            >
-                {/* Left: Task Info - Removed Execute/Delete buttons */}
-                <div className="w-1/2 flex flex-col border-r border-slate-100">
-                    <div className="p-10 border-b border-slate-100 flex justify-between items-start bg-gradient-to-br from-slate-50 to-white">
-                        <div>
-                            <div className="flex items-center gap-3 mb-4">
-                                <span className="px-4 py-2 bg-white border border-slate-200 rounded-full text-[10px] font-black text-slate-800 flex items-center gap-2 uppercase tracking-[2px] shadow-sm">
-                                    <div className={clsx("w-3 h-3 rounded-full", task.status === 'Done' ? 'bg-[#00c875] shadow-[0_0_10px_rgba(0,200,117,0.5)]' : 'bg-amber-400')} />
-                                    {task.status}
-                                </span>
-                            </div>
-                            <h2 className="text-3xl font-black text-slate-900 leading-tight tracking-tight">{task.title}</h2>
-                        </div>
-                        <button onClick={onClose} className="p-3 hover:bg-slate-100 rounded-full transition-all">
-                            <X size={24} className="text-slate-400" />
-                        </button>
-                    </div>
-
-                    <div className="p-10 flex-1 overflow-y-auto space-y-8">
-                        <section>
-                            <h3 className="text-[10px] font-black text-slate-300 uppercase tracking-[4px] mb-4">Orchestration Logic</h3>
-                            <div className="bg-slate-50 border border-slate-100 rounded-2xl p-6">
-                                <p className="text-slate-700 leading-relaxed whitespace-pre-wrap text-base font-medium">
-                                    {task.description || 'Define the orchestration logic for this task...'}
-                                </p>
-                            </div>
-                        </section>
-                    </div>
-                </div>
-
-                {/* Right: Antigravity Chat - Now receives description */}
-                <div className="w-1/2 flex flex-col bg-slate-950">
-                    <TaskChat taskId={task.id} taskTitle={task.title} taskDescription={task.description} />
-                </div>
             </div>
         </div>
     );

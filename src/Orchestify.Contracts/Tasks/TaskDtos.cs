@@ -155,3 +155,24 @@ public class UpdateTaskRequestDto
     /// </summary>
     public int Priority { get; set; } = 3;
 }
+
+/// <summary>
+/// DTO for a task message (AI chat).
+/// </summary>
+public class TaskMessageDto
+{
+    public Guid Id { get; set; }
+    public Guid TaskId { get; set; }
+    public string Content { get; set; } = string.Empty;
+    public string Sender { get; set; } = "User";
+    public string? SuggestedAction { get; set; }
+    public DateTime CreatedAt { get; set; }
+}
+
+/// <summary>
+/// Request DTO for sending a message.
+/// </summary>
+public class SendMessageRequestDto
+{
+    public string Content { get; set; } = string.Empty;
+}

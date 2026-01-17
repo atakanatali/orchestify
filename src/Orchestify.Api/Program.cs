@@ -82,6 +82,7 @@ public static class Program
             // Authorization and other middleware would go here
             // app.UseAuthorization();
 
+            app.MapHub<Api.Hubs.TaskExecutionHub>("/hubs/task-execution");
             app.MapControllers();
 
             Log.Information(LogServiceMessages.ApplicationStarted, LogConstants.ApiServiceName);
