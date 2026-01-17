@@ -77,6 +77,40 @@ export const dashboardApi = {
   stats: () => fetchApi<DashboardStats>('/dashboard/stats'),
 };
 
+// Discovery
+export const discoveryApi = {
+  listRepos: () => fetchApi<RepositoryInfo[]>('/discovery/repos'),
+  listBranches: (repoName: string) => fetchApi<string[]>(`/discovery/branches?repoName=${repoName}`),
+};
+
+// Task Messages (Antigravity Chat)
+export const messagesApi = {
+  list: (taskId: string) => fetchApi<TaskMessage[]>(`/tasks/${taskId}/messages`),
+  send: (taskId: string, content: string) => fetchApi<TaskMessage>(`/tasks/${taskId}/messages`, {
+    method: 'POST',
+    body: JSON.stringify({ content }),
+  }),
+};
+
+export interface TaskMessage {
+  id: string;
+  content: string;
+  sender: 'User' | 'Agent';
+  suggestedAction: string | null;
+  createdAt: string;
+}
+
+export interface AgentToolCall {
+  type: string;
+  command: string;
+  description?: string;
+}
+
+export interface RepositoryInfo {
+  name: string;
+  fullPath: string;
+}
+
 // Types
 export interface Workspace {
   id: string;
@@ -105,7 +139,7 @@ export interface Task {
   boardId: string;
   title: string;
   description: string;
-  status: 'Todo' | 'InProgress' | 'Done';
+  status: 'Todo' | 'In Progress' | 'Review' | 'Done' | 'Cancelled';
   priority: number;
   orderKey: number;
   attemptCount: number;
@@ -153,5 +187,5 @@ export interface UpdateWorkspace { name: string; defaultBranch?: string; }
 export interface CreateBoard { name: string; description?: string; }
 export interface UpdateBoard { name: string; description?: string; }
 export interface CreateTask { title: string; description?: string; priority?: number; }
-export interface UpdateTask { title: string; description?: string; status?: string; priority?: number; }
+export interface UpdateTask { title?: string; description?: string; status?: string; priority?: number; }
 export interface MoveTask { status?: string; afterTaskId?: string; }

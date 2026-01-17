@@ -25,7 +25,7 @@ fi
 
 # 2. Start Containers
 echo "🐳 Starting Docker Containers (orchestify)..."
-docker-compose up -d
+docker-compose up -d --build
 
 # 3. Wait for Postgres
 echo "🐘 Waiting for PostgreSQL to be ready..."
@@ -64,6 +64,7 @@ fi
 echo ""
 echo "✨ Orchestify is up and running!"
 echo "------------------------------------------------"
+echo "Web UI:     http://localhost:3000"
 echo "API:        http://localhost:5001"
 echo "n8n:        http://localhost:5678"
 echo "Ollama:     http://localhost:11434"

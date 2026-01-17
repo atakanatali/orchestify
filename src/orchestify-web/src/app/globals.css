@@ -1,29 +1,77 @@
 @import "tailwindcss";
 
 :root {
-  --primary: #E57A5C;
+  --brand-orange: #E57A5C;
+  --brand-orange-light: #F8B4A2;
+  --brand-teal: #5BBDD9;
+  --brand-teal-light: #A5E4F2;
+  --brand-dark: #1E293B;
+
+  --primary: var(--brand-orange);
   --primary-dark: #C96A4E;
-  --secondary: #5BBDD9;
-  --background: #F8FAFC;
-  --surface: #FFFFFF;
-  --text-primary: #1E293B;
-  --text-secondary: #64748B;
-  --border: #E2E8F0;
-  --success: #22C55E;
-  --warning: #F59E0B;
-  --error: #EF4444;
+  --secondary: var(--brand-teal);
+
+  /* Monday.com Palette */
+  --bg-sidebar-narrow: #1E293B;
+  --bg-sidebar-nav: #F8FAFC;
+  --bg-main: #FFFFFF;
+  --bg-hover: #F1F5F9;
+
+  --text-main: #334155;
+  --text-muted: #64748B;
+  --border-light: #E2E8F0;
+
+  /* Status Colors (Monday style) */
+  --status-done: #00C875;
+  --status-stuck: #E2445C;
+  --status-working: #FDAB3D;
+  --status-todo: #808080;
 }
 
 body {
   font-family: 'Inter', system-ui, sans-serif;
   background: var(--background);
-  color: var(--text-primary);
+  color: var(--text-main);
+  font-weight: 400;
+  /* Thinner weights by default */
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Headings remain bold */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+
+/* Global Button & Interactives */
+button,
+a {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+button:active,
+a:active {
+  transform: scale(0.96);
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 /* Monday.com style scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {

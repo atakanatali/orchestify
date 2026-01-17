@@ -121,6 +121,21 @@ services:
       ollama:
         condition: service_started
 
+  web:
+    image: orchestify-web:latest
+    container_name: orchestify-web
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.web
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://localhost:5001
+    depends_on:
+      api:
+        condition: service_started
+
 volumes:
   postgres_data:
   redis_data:
