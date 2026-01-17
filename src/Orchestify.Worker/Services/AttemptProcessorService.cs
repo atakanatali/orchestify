@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Orchestify.Application.Common.Interfaces;
@@ -58,6 +59,8 @@ public class AttemptProcessorService : BackgroundService
     {
         using var scope = _scopeFactory.CreateScope();
         var queueService = scope.ServiceProvider.GetRequiredService<IAttemptQueueService>();
+        var pipelineService = scope.ServiceProvider.GetRequiredService<IStepPipelineService>();
+        var context = scope.ServiceProvider.GetRequiredService<IApplicationDbContext>();
 
         var attempt = await queueService.DequeueNextAsync(cancellationToken);
 
@@ -80,12 +83,29 @@ public class AttemptProcessorService : BackgroundService
 
             try
             {
-                // Execute the attempt (placeholder for actual step execution)
-                await ExecuteAttemptAsync(attempt.Id, cancellationToken);
+                // Create pipeline steps if not exists
+                var existingSteps = await context.RunSteps
+                    .Where(s => s.AttemptId == attempt.Id)
+                    .AnyAsync(cancellationToken);
 
-                // Mark as succeeded
-                await queueService.MarkAsSucceededAsync(attempt.Id, cancellationToken);
-                _logger.LogInformation("Attempt {AttemptId} completed successfully", attempt.Id);
+                if (!existingSteps)
+                {
+                    await pipelineService.CreatePipelineStepsAsync(attempt, cancellationToken);
+                }
+
+                // Execute the pipeline
+                var success = await pipelineService.ExecutePipelineAsync(attempt, cancellationToken);
+
+                if (success)
+                {
+                    await queueService.MarkAsSucceededAsync(attempt.Id, cancellationToken);
+                    _logger.LogInformation("Attempt {AttemptId} completed successfully", attempt.Id);
+                }
+                else
+                {
+                    await queueService.MarkAsFailedAsync(attempt.Id, "Pipeline execution failed", cancellationToken);
+                    _logger.LogWarning("Attempt {AttemptId} failed", attempt.Id);
+                }
             }
             finally
             {
@@ -103,14 +123,6 @@ public class AttemptProcessorService : BackgroundService
             _logger.LogError(ex, "Attempt {AttemptId} failed", attempt.Id);
             await queueService.MarkAsFailedAsync(attempt.Id, ex.Message, cancellationToken);
         }
-    }
-
-    private async Task ExecuteAttemptAsync(Guid attemptId, CancellationToken cancellationToken)
-    {
-        // TODO: Implement step pipeline execution
-        // This is a placeholder - actual implementation will come in Step 18
-        _logger.LogInformation("Executing attempt {AttemptId} (placeholder)", attemptId);
-        await Task.Delay(1000, cancellationToken); // Simulate work
     }
 
     private async Task HeartbeatLoop(IAttemptQueueService queueService, Guid attemptId, CancellationToken cancellationToken)
