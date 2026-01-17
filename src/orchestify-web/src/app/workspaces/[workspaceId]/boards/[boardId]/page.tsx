@@ -48,13 +48,6 @@ export default function BoardPage() {
         },
     });
 
-    const moveMutation = useMutation({
-        mutationFn: ({ taskId, status }: { taskId: string; status: string }) =>
-            tasksApi.move(boardId, taskId, { status }),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['tasks', boardId] });
-        },
-    });
 
     const deleteMutation = useMutation({
         mutationFn: (taskId: string) => tasksApi.delete(boardId, taskId),
@@ -112,7 +105,6 @@ export default function BoardPage() {
                             onDeleteTask={(taskId) => {
                                 if (confirm("Delete task?")) deleteMutation.mutate(taskId);
                             }}
-                            onMoveTask={(taskId, status) => moveMutation.mutate({ taskId, status })}
                             onSelectTask={setSelectedTask}
                             onAddTask={() => setShowCreateTask(true)}
                         />
@@ -151,7 +143,6 @@ function KanbanColumn({
     tasks,
     onRunTask,
     onDeleteTask,
-    onMoveTask,
     onSelectTask,
     onAddTask
 }: {
@@ -159,7 +150,6 @@ function KanbanColumn({
     tasks: Task[];
     onRunTask: (taskId: string) => void;
     onDeleteTask: (taskId: string) => void;
-    onMoveTask: (taskId: string, status: string) => void;
     onSelectTask: (task: Task) => void;
     onAddTask: () => void;
 }) {
