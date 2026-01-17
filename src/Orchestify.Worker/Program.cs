@@ -55,7 +55,9 @@ public static class Program
 
                     // Register the background workers
                     services.AddHostedService<Worker>();
-                    services.AddHostedService<AttemptProcessorService>();
+                    // TODO: Legacy polling service - disabled in favor of MassTransit
+                    // Requires IAttemptQueueService which is not yet implemented
+                    // services.AddHostedService<AttemptProcessorService>();
                 })
                 .Build();
 
@@ -74,18 +76,37 @@ public static class Program
 
     /// <summary>
     /// Configures Serilog with Console and Elasticsearch sinks.
+    /// Uses environment variables: Logging__Elasticsearch__Url and Logging__EnableElasticsearchSink
     /// </summary>
     private static void ConfigureSerilog()
     {
-        var elasticsearchUrl = Environment.GetEnvironmentVariable("Serilog__ElasticsearchUrl");
+        // Docker passes these as Logging__Elasticsearch__Url (colon-separated becomes double underscore)
+        var elasticsearchUrl = Environment.GetEnvironmentVariable("Logging__Elasticsearch__Url") 
+            ?? Environment.GetEnvironmentVariable("Serilog__ElasticsearchUrl")
+            ?? "http://elasticsearch:9200";
+        
+        var enableEs = Environment.GetEnvironmentVariable("Logging__EnableElasticsearchSink")?.Equals("true", StringComparison.OrdinalIgnoreCase) ?? false;
         var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? Environments.Development;
 
-        var logger = SerilogConfiguration.CreateDefaultLogger(
-            LogConstants.WorkerServiceName,
-            elasticsearchUrl ?? "http://localhost:9200",
-            environment);
+        var loggerConfig = new LoggerConfiguration()
+            .MinimumLevel.Information()
+            .Enrich.FromLogContext()
+            .Enrich.WithProperty("ServiceName", LogConstants.WorkerServiceName)
+            .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{ServiceName}] {Message:lj}{NewLine}{Exception}");
 
-        Log.Logger = logger;
+        if (enableEs)
+        {
+            loggerConfig.WriteTo.Elasticsearch(new Serilog.Sinks.Elasticsearch.ElasticsearchSinkOptions(new Uri(elasticsearchUrl))
+            {
+                AutoRegisterTemplate = true,
+                IndexFormat = "orchestify-logs-{0:yyyy.MM.dd}",
+                NumberOfShards = 1,
+                NumberOfReplicas = 0
+            });
+        }
+
+        Log.Logger = loggerConfig.CreateLogger();
+        Log.Information("Worker Serilog initialized. Elasticsearch sink enabled: {EsEnabled}, URL: {EsUrl}", enableEs, elasticsearchUrl);
     }
 }
 

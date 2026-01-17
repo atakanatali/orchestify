@@ -153,14 +153,41 @@ Error logs include:
 
 | Service | Purpose | Port |
 |---------|---------|------|
-| elasticsearch | Log storage | 9200, 9300 |
-| kibana | Log visualization | 5601 |
+| elasticsearch | Centralized log storage | 9200 |
+| kibana | Log visualization & dashboards | 5601 |
 | postgres | Primary database | 5432 |
-| redis | Caching layer | 6379 |
-| rabbitmq | Message broker | 5672, 15672 |
+| redis | Caching + Pub/Sub events | 6379 |
+| rabbitmq | Task queue distribution | 5672, 15672 |
 | n8n | Workflow automation | 5678 |
-| orchestify-api | Web API | 5000 |
-| orchestify-worker | Background worker | - |
+| ollama | Local LLM engine | 11434 |
+| orchestify-api | Web API + SignalR hub | 5001 |
+| orchestify-worker | Task execution + MassTransit consumer | - |
+| orchestify-web | Next.js frontend | 3000 |
+
+### Real-Time Event Flow (Phase 11)
+
+```
+┌─────────────┐     RabbitMQ      ┌─────────────┐     Redis Pub/Sub    ┌─────────────┐
+│   API       │ ──── RunTask ───→│   Worker    │ ──── task:*:events ──→│   API       │
+│  (Publisher)│                   │  (Consumer) │                       │  (Bridge)   │
+└─────────────┘                   └─────────────┘                       └──────┬──────┘
+                                                                               │
+                                                                          SignalR
+                                                                               │
+                                                                               ▼
+                                                                        ┌─────────────┐
+                                                                        │  Frontend   │
+                                                                        └─────────────┘
+```
+
+### MassTransit Concurrency Configuration
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `PrefetchCount` | 16 | Messages pre-fetched from RabbitMQ |
+| `ConcurrentMessageLimit` | 8 | Max concurrent message processing |
+
+For 120 parallel tasks: Use 15 worker instances with default settings, or scale `ConcurrentMessageLimit`.
 
 ### Health Checks
 
