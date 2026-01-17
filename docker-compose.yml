@@ -81,6 +81,8 @@ services:
       context: .
       dockerfile: infra/docker/Dockerfile.api
     container_name: orchestify-api
+    volumes:
+      - ./repos:/repos
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - Database__ConnectionString=Host=postgres;Port=5432;Database=orchestify;Username=orchestify;Password=orchestify_dev
@@ -104,6 +106,8 @@ services:
       context: .
       dockerfile: infra/docker/Dockerfile.worker
     container_name: orchestify-worker
+    volumes:
+      - ./repos:/repos
     environment:
       - Database__ConnectionString=Host=postgres;Port=5432;Database=orchestify;Username=orchestify;Password=orchestify_dev
       - Caching__ConnectionString=redis:6379

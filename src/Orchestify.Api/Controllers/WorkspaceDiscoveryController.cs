@@ -15,10 +15,15 @@ public class WorkspaceDiscoveryController : ControllerBase
     public WorkspaceDiscoveryController(IGitService gitService, IConfiguration configuration)
     {
         _gitService = gitService;
-        var relativePath = configuration["Workspace:ReposRoot"] ?? "repos";
-        // Get absolute path relative to the solution root or executable
-        _reposRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../", relativePath));
+        // In Docker, we use a fixed volume at /repos. 
+        // Fallback to local 'repos' for development outside Docker.
+        _reposRoot = configuration["Workspace:ReposRoot"] ?? "repos";
         
+        if (!Path.IsPathRooted(_reposRoot))
+        {
+             _reposRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../", _reposRoot));
+        }
+
         if (!Directory.Exists(_reposRoot))
         {
             Directory.CreateDirectory(_reposRoot);
@@ -40,6 +45,25 @@ public class WorkspaceDiscoveryController : ControllerBase
             .ToList();
 
         return Ok(repos);
+    }
+
+    [HttpPost("repos")]
+    public async Task<IActionResult> CreateRepo([FromBody] CreateRepoRequest request)
+    {
+        if (string.IsNullOrEmpty(request.Name)) return BadRequest("Repo name is required");
+
+        var repoPath = Path.Combine(_reposRoot, request.Name);
+        if (Directory.Exists(repoPath)) return BadRequest("Repository already exists");
+
+        var result = await _gitService.InitAsync(repoPath, default);
+        if (!result.Success) return BadRequest(new { error = result.Error });
+
+        return Ok(new { name = request.Name, path = repoPath });
+    }
+
+    public class CreateRepoRequest
+    {
+        public string Name { get; set; } = string.Empty;
     }
 
     public class RepositoryInfo

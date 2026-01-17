@@ -3,7 +3,7 @@
 [![CI](https://github.com/atakanatali/orchestify/actions/workflows/ci.yml/badge.svg)](https://github.com/atakanatali/orchestify/actions/workflows/ci.yml)
 [![Unit Tests](https://github.com/atakanatali/orchestify/actions/workflows/tests.yml/badge.svg)](https://github.com/atakanatali/orchestify/actions/workflows/tests.yml)
 
-**Orchestify** is an AI-powered code orchestration platform designed for high-performance automated development workflows. It runs locally, respects your privacy, and leverages Apple Silicon (Metal/GPU) for near-instant AI responses.
+**Orchestify** is an AI-powered code orchestration platform designed for high-performance automated development workflows. It runs locally via Docker, respects your privacy, and leverages hardware acceleration (Metal/GPU) for near-instant AI responses across macOS, Linux, and Windows (WSL2).
 
 ---
 
@@ -74,16 +74,14 @@ The system is configured via environment variables and `.env` files.
 - `POST /api/workspaces/{id}/git/pull` - Sync code.
 - `POST /api/workspaces/{id}/build` - Compile project and run tests.
 
----
+## ⚡ Hardware Acceleration & Optimization
 
-## 🍎 Apple Silicon Optimization
+Orchestify is designed to be cross-platform while squeezing maximum performance from your hardware:
 
-Orchestify is optimized for macOS:
-- **Metal/GPU Acceleration**: Ollama automatically detects and uses the neural engine for maximum TPS.
-- **UDS (Unix Domain Sockets)**: High-speed local communication between Worker and AI engine.
-- **Memory Protection**: Fail-fast logic prevents system freezes by checking available RAM before loading massive models.
-
----
+- **Apple Silicon (macOS)**: Automatically leverages the Neural Engine and Metal GPU via Ollama for extreme tokens-per-second.
+- **Linux/Windows (WSL2)**: Supports NVIDIA (CUDA) and AMD (ROCm) acceleration through the Dockerized Ollama engine.
+- **UDS (Unix Domain Sockets)**: High-speed, zero-network-overhead communication between the Worker and AI engine (available on macOS/Linux).
+- **Memory Protection**: Intelligent pre-launch checks prevent system freezes by validating available RAM/VRAM before loading large models.
 
 ## Features
 - **AI-Powered Orchestration**: Integrated local AI for managing development tasks via chat.
