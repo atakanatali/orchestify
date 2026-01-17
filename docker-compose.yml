@@ -1,0 +1,128 @@
+name: orchestify
+
+services:
+  # PostgreSQL - Primary database
+  postgres:
+    image: postgres:16-alpine
+    container_name: orchestify-postgres
+    environment:
+      - POSTGRES_USER=orchestify
+      - POSTGRES_PASSWORD=orchestify_dev
+      - POSTGRES_DB=orchestify
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U orchestify || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis - Caching layer
+  redis:
+    image: redis:7-alpine
+    container_name: orchestify-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # RabbitMQ - Message broker
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: orchestify-rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=orchestify
+      - RABBITMQ_DEFAULT_PASS=orchestify_dev
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # n8n - Workflow Automation
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: orchestify-n8n
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - NODE_ENV=production
+      - WEBHOOK_URL=http://localhost:5678/
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+  # Ollama - Local LLM Engine
+  ollama:
+    image: ollama/ollama:latest
+    container_name: orchestify-ollama
+    volumes:
+      - ./models:/root/.ollama
+    ports:
+      - "11434:11434"
+
+  # Orchestify API
+  api:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.api
+    container_name: orchestify-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Database__ConnectionString=Host=postgres;Port=5432;Database=orchestify;Username=orchestify;Password=orchestify_dev
+      - Caching__ConnectionString=redis:6379
+      - RabbitMQ__Host=rabbitmq
+      - RabbitMQ__Username=orchestify
+      - RabbitMQ__Password=orchestify_dev
+    ports:
+      - "5001:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  # Orchestify Worker
+  worker:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.worker
+    container_name: orchestify-worker
+    environment:
+      - Database__ConnectionString=Host=postgres;Port=5432;Database=orchestify;Username=orchestify;Password=orchestify_dev
+      - Caching__ConnectionString=redis:6379
+      - RabbitMQ__Host=rabbitmq
+      - RabbitMQ__Username=orchestify
+      - RabbitMQ__Password=orchestify_dev
+      - Agent__OllamaUrl=http://ollama:11434
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      ollama:
+        condition: service_started
+
+volumes:
+  postgres_data:
+  redis_data:
+  rabbitmq_data:
+  n8n_data:

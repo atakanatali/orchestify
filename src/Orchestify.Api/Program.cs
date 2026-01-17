@@ -36,6 +36,8 @@ public static class Program
             services.AddDatabase(configuration);
             services.AddCaching(configuration);
             services.AddApplication();
+            services.AddScoped<Application.Common.Interfaces.ITaskExecutionNotifier, Api.Hubs.SignalRTaskExecutionNotifier>();
+            services.AddSignalR();
 
             // Use Serilog for logging
             builder.Host.UseSerilog();

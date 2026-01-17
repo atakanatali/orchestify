@@ -40,7 +40,7 @@ public sealed class SerilogConfigurationOptions
     /// <summary>
     /// Gets or sets whether to output logs to Elasticsearch.
     /// </summary>
-    public bool EnableElasticsearchSink { get; set; } = true;
+    public bool EnableElasticsearchSink { get; set; } = false;
 
     /// <summary>
     /// Gets or sets the Elasticsearch index format.

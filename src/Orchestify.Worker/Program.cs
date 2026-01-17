@@ -43,7 +43,6 @@ public static class Program
                     services.AddScoped<IStepExecutor, RestoreStepExecutor>();
                     services.AddScoped<IStepExecutor, BuildStepExecutor>();
                     services.AddScoped<IStepExecutor, TestStepExecutor>();
-                    services.AddScoped<IStepExecutor, AgentStepExecutor>();
                     services.AddScoped<IStepExecutor, ReviewStepExecutor>();
 
                     // Register the background workers
