@@ -28,16 +28,20 @@ This script will:
 
 ## 🏗️ Core Architecture
 
-Orchestify follows Clean Architecture principles with a focus on low-latency inter-process communication.
+Orchestify follows Clean Architecture principles with a focus on low-latency inter-process communication and full observability.
 
 ```mermaid
 graph TD
     Client[Frontend UI] -- SignalR --> API[Orchestify API]
     API -- MassTransit/RabbitMQ --> Worker[Orchestify Worker]
     Worker -- gRPC over UDS --> AI[Local Ollama Engine]
+    Worker -- Redis Pub/Sub --> API
     Worker -- HTTP --> n8n[Workflow Automation]
     Worker -- EF Core --> DB[(PostgreSQL)]
     AI -- Acceleration --> HW[GPU/NPU Acceleration]
+    API -- Serilog --> ES[(Elasticsearch)]
+    Worker -- Serilog --> ES
+    ES --> Kibana[Kibana Dashboard]
 ```
 
 ---
@@ -55,11 +59,17 @@ The system is configured via environment variables and `.env` files.
 | `STRICT_RAM_CHECK`| Fail-fast on low RAM | `true` |
 
 ### Infrastructure
-- **Web UI**: [http://localhost:3000](http://localhost:3000)
-- **API**: [http://localhost:5001](http://localhost:5001)
-- **n8n**: [http://localhost:5678](http://localhost:5678)
-- **Ollama**: [http://localhost:11434](http://localhost:11434)
-- **Postgres**: `localhost:5432` (User: `orchestify`, DB: `orchestify`)
+| Service | URL |
+|---------|-----|
+| **Web UI** | [http://localhost:3000](http://localhost:3000) |
+| **API** | [http://localhost:5001](http://localhost:5001) |
+| **Kibana** | [http://localhost:5601](http://localhost:5601) |
+| **Elasticsearch** | [http://localhost:9200](http://localhost:9200) |
+| **RabbitMQ Admin** | [http://localhost:15672](http://localhost:15672) (user: `orchestify`) |
+| **n8n** | [http://localhost:5678](http://localhost:5678) |
+| **Ollama** | [http://localhost:11434](http://localhost:11434) |
+| **Postgres** | `localhost:5432` (User: `orchestify`, DB: `orchestify`) |
+| **Redis** | `localhost:6379` |
 
 ---
 

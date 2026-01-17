@@ -46,13 +46,20 @@ until docker exec orchestify-postgres pg_isready -U orchestify > /dev/null 2>&1;
 done
 echo " Ready!"
 
-# 4. Apply Database Migrations
 echo "🏗️ Applying Database Migrations..."
 if command -v dotnet &> /dev/null; then
     dotnet ef database update --project src/Orchestify.Infrastructure --startup-project src/Orchestify.Api
 else
     echo "⚠️  dotnet SDK not found. Skipping migrations."
 fi
+
+# 4.5 Wait for Elasticsearch
+echo "🔍 Waiting for Elasticsearch to be ready..."
+until curl -sf http://localhost:9200/_cluster/health > /dev/null 2>&1; do
+  echo -n "."
+  sleep 3
+done
+echo " Ready!"
 
 # 5. Model Management
 echo "📥 Checking LLM Models..."
@@ -75,11 +82,14 @@ fi
 echo ""
 echo "✨ Orchestify is up and running!"
 echo "------------------------------------------------"
-echo "Web UI:     http://localhost:3000"
-echo "API:        http://localhost:5001"
-echo "n8n:        http://localhost:5678"
-echo "Ollama:     http://localhost:11434"
-echo "Postgres:   localhost:5432"
-echo "Redis:      localhost:6379"
+echo "Web UI:         http://localhost:3000"
+echo "API:            http://localhost:5001"
+echo "n8n:            http://localhost:5678"
+echo "Kibana:         http://localhost:5601"
+echo "Elasticsearch:  http://localhost:9200"
+echo "RabbitMQ:       http://localhost:15672 (admin UI)"
+echo "Ollama:         http://localhost:11434"
+echo "Postgres:       localhost:5432"
+echo "Redis:          localhost:6379"
 echo "------------------------------------------------"
 echo "Active AI Model: $ACTIVE_MODEL"

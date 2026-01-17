@@ -9,6 +9,7 @@ using Serilog;
 // Import Infrastructure extension methods
 using Orchestify.Infrastructure;
 using Orchestify.Infrastructure.Services;
+using Orchestify.Infrastructure.Messaging;
 using Orchestify.Application;
 using Orchestify.Application.Common.Interfaces;
 
@@ -40,6 +41,12 @@ public static class Program
             services.AddApplication();
             services.AddScoped<Application.Common.Interfaces.ITaskExecutionNotifier, Api.Hubs.SignalRTaskExecutionNotifier>();
             services.AddSignalR();
+
+            // Add MassTransit with RabbitMQ for task queue
+            services.AddMassTransitWithRabbitMq(configuration);
+
+            // Add Redis to SignalR bridge for real-time events from workers
+            services.AddHostedService<Api.Services.RedisToSignalRBridge>();
 
             // Use Serilog for logging
             builder.Host.UseSerilog();

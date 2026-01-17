@@ -66,6 +66,36 @@ services:
     volumes:
       - n8n_data:/home/node/.n8n
 
+  # Elasticsearch - Centralized Logging
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: orchestify-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Kibana - Log Visualization
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.0
+    container_name: orchestify-kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
   # Ollama - Local LLM Engine
   ollama:
     image: ollama/ollama:latest
@@ -90,6 +120,9 @@ services:
       - RabbitMQ__Host=rabbitmq
       - RabbitMQ__Username=orchestify
       - RabbitMQ__Password=orchestify_dev
+      - Logging__Elasticsearch__Url=http://elasticsearch:9200
+      - Logging__Elasticsearch__IndexFormat=orchestify-logs-{0:yyyy.MM.dd}
+      - Logging__EnableElasticsearchSink=true
     ports:
       - "5001:8080"
     depends_on:
@@ -98,6 +131,8 @@ services:
       redis:
         condition: service_healthy
       rabbitmq:
+        condition: service_healthy
+      elasticsearch:
         condition: service_healthy
 
   # Orchestify Worker
@@ -115,6 +150,9 @@ services:
       - RabbitMQ__Username=orchestify
       - RabbitMQ__Password=orchestify_dev
       - Agent__OllamaUrl=http://ollama:11434
+      - Logging__Elasticsearch__Url=http://elasticsearch:9200
+      - Logging__Elasticsearch__IndexFormat=orchestify-logs-{0:yyyy.MM.dd}
+      - Logging__EnableElasticsearchSink=true
     depends_on:
       postgres:
         condition: service_healthy
@@ -124,6 +162,8 @@ services:
         condition: service_healthy
       ollama:
         condition: service_started
+      elasticsearch:
+        condition: service_healthy
 
   web:
     image: orchestify-web:latest
@@ -147,3 +187,4 @@ volumes:
   redis_data:
   rabbitmq_data:
   n8n_data:
+  elasticsearch_data:
