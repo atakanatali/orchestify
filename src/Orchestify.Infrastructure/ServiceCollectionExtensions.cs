@@ -72,6 +72,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAttemptQueueService, Services.AttemptQueueService>();
         services.AddScoped<IStepPipelineService, Services.StepPipelineService>();
         services.AddScoped<IGitService, Services.GitService>();
+        services.AddScoped<IProcessRunner, Services.ProcessRunner>();
 
         return services;
     }

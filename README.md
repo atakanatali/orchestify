@@ -1,208 +1,114 @@
 # Orchestify
 
-A distributed task orchestration system built with .NET 8.0, featuring structured logging, background processing, and resilient messaging.
-
-## Overview
-
-Orchestify is a microservices-based application designed to manage and orchestrate complex workflows. It provides a robust foundation for building distributed systems with proper observability, error handling, and correlation tracking.
-
-## Architecture
-
-The solution follows Clean Architecture principles with the following layers:
-
-- **Orchestify.Api** - ASP.NET Core Web API for HTTP endpoints
-- **Orchestify.Worker** - Background service for async processing
-- **Orchestify.Application** - Application business logic and use cases
-- **Orchestify.Domain** - Core domain entities and business rules
-- **Orchestify.Infrastructure** - External concerns (data access, logging, messaging)
-- **Orchestify.Contracts** - Shared DTOs and interfaces
-- **Orchestify.Shared** - Cross-cutting utilities (constants, results, logging abstractions)
-
-## Features
-
-### Structured Logging (ORC-05)
-
-- **Serilog Integration**: Production-ready structured logging with Serilog
-- **Elasticsearch Sink**: Persistent log storage with automatic index management
-- **Console Sink**: Local debugging with colored console output
-- **Log Enrichment**: Automatic enrichment with:
-  - Correlation ID (request tracing)
-  - Service name
-  - Environment
-  - Machine name
-  - Process ID
-  - Thread ID
-- **Exception Serialization**: Full exception details including:
-  - Exception type
-  - Exception message
-  - Stack trace
-  - Inner exceptions (recursive)
-  - Target site
-  - HResult
-  - Custom exception data
-
-### Workspace Management
-
-Core capability to manage project boundaries:
-- **CRUD Operations**: Complete API for creating, reading, updating, and deleting workspaces
-- **Entity Tracking**: Tracks repository path, default branch, and task statistics
-- **DTOs**: Standardized data transfer objects for API communication
-
-
-### Log Indices
-
-Logs are stored in Elasticsearch under the following patterns:
-
-- `logs-orchestify-api-{date}` - API service logs
-- `logs-orchestify-worker-{date}` - Worker service logs
-
-Query all logs with `logs-*` pattern in Kibana.
+AI-powered code orchestration platform for managing automated development workflows.
 
 ## Quick Start
 
 ### Prerequisites
-
-- Docker and Docker Compose
 - .NET 8.0 SDK
+- Docker & Docker Compose
+- PostgreSQL 16+ (or use Docker)
+- Redis 7+ (or use Docker)
 
-### Running with Docker Compose
-
-```bash
-# Start all infrastructure services and applications
-cd infra
-docker compose up -d
-
-# View logs
-docker compose logs -f orchestify-api
-docker compose logs -f orchestify-worker
-
-# Stop all services
-docker compose down
-```
-
-### Accessing Services
-
-| Service | URL | Credentials |
-|---------|-----|-------------|
-| API | http://localhost:5000 | - |
-| Kibana | http://localhost:5601 | - |
-| Elasticsearch | http://localhost:9200 | - |
-| RabbitMQ Management | http://localhost:15672 | orchestify/orchestify_password |
-
-### Health Check
+### Development with Docker
 
 ```bash
-curl http://localhost:5000/health
+# Start all services
+docker-compose up -d
+
+# Apply migrations
+dotnet ef database update --project src/Orchestify.Infrastructure --startup-project src/Orchestify.Api
 ```
 
-## Configuration
+### Development without Docker
 
-### Serilog Configuration
-
-Configure Serilog via `appsettings.json`:
-
-```json
-{
-  "Serilog": {
-    "ElasticsearchUrl": "http://localhost:9200",
-    "ServiceName": "orchestify-api",
-    "Environment": "Development",
-    "MinimumLogLevel": "Debug",
-    "EnableConsoleSink": true,
-    "EnableElasticsearchSink": true
-  }
-}
-```
-
-### Environment Variables
-
-Override settings with environment variables (used in Docker):
-
-- `Serilog__ElasticsearchUrl` - Elasticsearch connection URL
-- `Serilog__ServiceName` - Service identifier
-- `Serilog__Environment` - Environment name (Development/Production)
-- `ConnectionStrings__Postgres` - PostgreSQL connection string
-- `ConnectionStrings__Redis` - Redis connection string
-- `RabbitMQ__Host` - RabbitMQ host
-- `RabbitMQ__Username` - RabbitMQ username
-- `RabbitMQ__Password` - RabbitMQ password
-
-## Logging Usage
-
-### Using ILogService
-
-```csharp
-public class MyService
-{
-    private readonly ILogService _logService;
-
-    public MyService(ILogService logService)
-    {
-        _logService = logService;
-    }
-
-    public void DoWork()
-    {
-        _logService.Info("ORC_WORK_START", "Starting work");
-
-        try
-        {
-            // ... do work ...
-            _logService.Info("ORC_WORK_COMPLETE", "Work completed successfully");
-        }
-        catch (Exception ex)
-        {
-            _logService.Error(ex, "ORC_WORK_ERROR", "Work failed");
-        }
-    }
-}
-```
-
-### Log Levels
-
-- `Info(code, message, data)` - Informational messages
-- `Warn(code, message, data)` - Warning messages
-- `Error(exception, code, message, data)` - Error with exception details
-- `Debug(code, message, data)` - Debug-level diagnostics
-
-## Project Structure
-
-```
-orchestify/
-├── src/
-│   ├── Orchestify.Api/          # Web API
-│   ├── Orchestify.Worker/       # Background worker
-│   ├── Orchestify.Application/  # Application layer
-│   ├── Orchestify.Domain/       # Domain layer
-│   ├── Orchestify.Infrastructure/  # Infrastructure
-│   ├── Orchestify.Contracts/    # Shared contracts
-│   └── Orchestify.Shared/       # Shared utilities
-├── tests/
-├── infra/
-│   └── docker-compose.yml       # Infrastructure services
-└── scripts/
-```
-
-## Development
-
-### Building
-
+1. Update connection strings in `appsettings.Development.json`
+2. Run the API:
 ```bash
-dotnet build
-```
-
-### Running Locally
-
-```bash
-# API
 cd src/Orchestify.Api
 dotnet run
+```
 
-# Worker
+3. Run the Worker:
+```bash
 cd src/Orchestify.Worker
 dotnet run
 ```
 
+## API Endpoints
+
+### Workspaces
+- `GET /api/workspaces` - List workspaces
+- `POST /api/workspaces` - Create workspace
+- `GET /api/workspaces/{id}` - Get workspace
+- `PUT /api/workspaces/{id}` - Update workspace
+- `DELETE /api/workspaces/{id}` - Delete workspace
+
+### Boards
+- `GET /api/workspaces/{workspaceId}/boards` - List boards
+- `POST /api/workspaces/{workspaceId}/boards` - Create board
+- `GET /api/workspaces/{workspaceId}/boards/{id}` - Get board
+- `PUT /api/workspaces/{workspaceId}/boards/{id}` - Update board
+- `DELETE /api/workspaces/{workspaceId}/boards/{id}` - Delete board
+
+### Tasks
+- `GET /api/boards/{boardId}/tasks` - List tasks
+- `POST /api/boards/{boardId}/tasks` - Create task  
+- `GET /api/boards/{boardId}/tasks/{id}` - Get task
+- `PUT /api/boards/{boardId}/tasks/{id}` - Update task
+- `DELETE /api/boards/{boardId}/tasks/{id}` - Delete task
+- `PATCH /api/boards/{boardId}/tasks/{id}/move` - Move task
+- `POST /api/boards/{boardId}/tasks/{id}/run` - Run task
+
+### Attempts
+- `GET /api/tasks/{taskId}/attempts` - List attempts
+- `GET /api/tasks/{taskId}/attempts/{id}` - Get attempt
+- `POST /api/tasks/{taskId}/attempts/{id}/cancel` - Cancel attempt
+- `GET /api/tasks/{taskId}/attempts/{id}/steps` - List run steps
+
+### System
+- `GET /api/health` - Health check
+- `GET /api/health/detailed` - Detailed health
+- `GET /api/dashboard/stats` - Dashboard statistics
+- `GET /api/settings` - List settings
+- `PUT /api/settings/{key}` - Upsert setting
+
+### Git & Build
+- `GET /api/workspaces/{id}/git/branch` - Get current branch
+- `POST /api/workspaces/{id}/git/pull` - Pull changes
+- `POST /api/workspaces/{id}/git/checkout` - Checkout branch
+- `POST /api/workspaces/{id}/build` - Build project
+- `POST /api/workspaces/{id}/build/restore` - Restore deps
+- `POST /api/workspaces/{id}/build/test` - Run tests
+
+### Real-time
+- `GET /api/attempts/{id}/stream` - SSE log stream
+- SignalR Hub: `/hubs/execution`
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                        API Layer                         │
+│  Controllers → MediatR Handlers → Database              │
+├─────────────────────────────────────────────────────────┤
+│                    Application Layer                     │
+│  Commands/Queries, Validators, Pipeline Behaviors       │
+├─────────────────────────────────────────────────────────┤
+│                 Infrastructure Layer                     │
+│  EF Core, Queue Service, Git Service, Process Runner    │
+├─────────────────────────────────────────────────────────┤
+│                     Domain Layer                         │
+│  Entities, Enums, Value Objects                         │
+└─────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────┐
+│                    Worker Service                        │
+│  AttemptProcessor → StepPipeline → StepExecutors        │
+└─────────────────────────────────────────────────────────┘
+```
+
 ## License
 
-MIT License
+MIT
