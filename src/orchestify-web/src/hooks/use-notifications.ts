@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import * as signalR from '@microsoft/signalr';
 import { useQueryClient } from '@tanstack/react-query';
 
-const HUB_URL = process.env.NEXT_PUBLIC_HUB_URL || 'http://localhost:5000/hubs/task-execution';
+const HUB_URL = process.env.NEXT_PUBLIC_HUB_URL || 'http://localhost:5001/hubs/task-execution';
 
 export function useNotifications() {
     const queryClient = useQueryClient();

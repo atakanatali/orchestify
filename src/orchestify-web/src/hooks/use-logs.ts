@@ -25,7 +25,7 @@ export function useLogs(attemptId: string | null) {
     useEffect(() => {
         if (!attemptId) return;
 
-        const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+        const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
 
         // Add initial connecting log
         setLogs([{

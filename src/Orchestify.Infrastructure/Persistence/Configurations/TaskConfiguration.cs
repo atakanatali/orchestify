@@ -34,7 +34,7 @@ public class TaskConfiguration : IEntityTypeConfiguration<TaskEntity>
         builder.HasIndex(t => new { t.BoardId, t.OrderKey });
 
         builder.HasOne(t => t.Board)
-            .WithMany()
+            .WithMany(b => b.Tasks)
             .HasForeignKey(t => t.BoardId)
             .OnDelete(DeleteBehavior.Cascade);
     }

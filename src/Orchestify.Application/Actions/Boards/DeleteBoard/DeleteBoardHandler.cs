@@ -31,6 +31,7 @@ public class DeleteBoardHandler : IRequestHandler<DeleteBoardCommand, ServiceRes
     public async Task<ServiceResult> Handle(DeleteBoardCommand request, CancellationToken cancellationToken)
     {
         var board = await _context.Boards
+            .Include(b => b.Tasks)
             .FirstOrDefaultAsync(b => b.Id == request.BoardId, cancellationToken);
 
         if (board == null)
@@ -38,6 +39,18 @@ public class DeleteBoardHandler : IRequestHandler<DeleteBoardCommand, ServiceRes
             return ServiceResult.Failure(
                 ServiceError.Boards.NotFound,
                 $"Board with ID {request.BoardId} was not found.");
+        }
+
+        // Check if any tasks are in progress
+        var inProgressTasks = board.Tasks
+            .Where(t => t.Status == Domain.Enums.TaskStatus.InProgress)
+            .ToList();
+
+        if (inProgressTasks.Count > 0)
+        {
+            return ServiceResult.Failure(
+                ServiceError.Boards.HasInProgressTasks,
+                $"Cannot delete board. There are {inProgressTasks.Count} task(s) currently in progress.");
         }
 
         _context.Boards.Remove(board);

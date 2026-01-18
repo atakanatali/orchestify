@@ -300,6 +300,13 @@ export default function BoardPage() {
                     onClose={() => setEditingTask(null)}
                 />
             )}
+
+            {showCreateTask && (
+                <CreateTaskModal
+                    boardId={boardId as string}
+                    onClose={() => setShowCreateTask(false)}
+                />
+            )}
         </div>
     );
 }

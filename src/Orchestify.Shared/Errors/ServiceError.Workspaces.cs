@@ -90,5 +90,10 @@ public static partial class ServiceError
         /// Workspace invitation already accepted.
         /// </summary>
         public static string InvitationAlreadyAccepted => FormatErrorCode(WorkspaceDomain, "INVITATION_ALREADY_ACCEPTED");
+
+        /// <summary>
+        /// Workspace has tasks in progress and cannot be deleted.
+        /// </summary>
+        public static string HasInProgressTasks => FormatErrorCode(WorkspaceDomain, "HAS_IN_PROGRESS_TASKS");
     }
 }
