@@ -31,11 +31,26 @@ public class DeleteWorkspaceHandler : IRequestHandler<DeleteWorkspaceCommand, Se
     public async Task<ServiceResult> Handle(DeleteWorkspaceCommand request, CancellationToken cancellationToken)
     {
         var workspace = await _context.Workspaces
+            .Include(w => w.Boards)
+            .ThenInclude(b => b.Tasks)
             .FirstOrDefaultAsync(w => w.Id == request.Id, cancellationToken);
 
         if (workspace == null)
         {
              return ServiceResult.Failure(ServiceError.Workspaces.NotFound, $"Workspace with ID {request.Id} was not found.");
+        }
+
+        // Check if any tasks are in progress
+        var inProgressTasks = workspace.Boards
+            .SelectMany(b => b.Tasks)
+            .Where(t => t.Status == Domain.Enums.TaskStatus.InProgress)
+            .ToList();
+
+        if (inProgressTasks.Count > 0)
+        {
+            return ServiceResult.Failure(
+                ServiceError.Workspaces.HasInProgressTasks,
+                $"Cannot delete workspace. There are {inProgressTasks.Count} task(s) currently in progress.");
         }
 
         _context.Workspaces.Remove(workspace);

@@ -100,5 +100,10 @@ public static partial class ServiceError
         /// Board template not found.
         /// </summary>
         public static string TemplateNotFound => FormatErrorCode(BoardDomain, "TEMPLATE_NOT_FOUND");
+
+        /// <summary>
+        /// Board has tasks in progress and cannot be deleted.
+        /// </summary>
+        public static string HasInProgressTasks => FormatErrorCode(BoardDomain, "HAS_IN_PROGRESS_TASKS");
     }
 }

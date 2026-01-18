@@ -56,4 +56,9 @@ public class WorkspaceEntity
     /// Date when the workspace was last updated.
     /// </summary>
     public DateTime? UpdatedAt { get; set; }
+
+    /// <summary>
+    /// Navigation property to boards in this workspace.
+    /// </summary>
+    public virtual ICollection<BoardEntity> Boards { get; set; } = new List<BoardEntity>();
 }

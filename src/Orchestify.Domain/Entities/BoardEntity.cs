@@ -52,4 +52,9 @@ public class BoardEntity
     /// Navigation property to the parent workspace.
     /// </summary>
     public WorkspaceEntity? Workspace { get; set; }
+
+    /// <summary>
+    /// Navigation property to tasks in this board.
+    /// </summary>
+    public virtual ICollection<TaskEntity> Tasks { get; set; } = new List<TaskEntity>();
 }

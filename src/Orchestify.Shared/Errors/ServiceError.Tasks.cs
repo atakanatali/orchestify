@@ -125,5 +125,10 @@ public static partial class ServiceError
         /// Cannot create subtask depth limit exceeded.
         /// </summary>
         public static string SubtaskDepthExceeded => FormatErrorCode(TaskDomain, "SUBTASK_DEPTH_EXCEEDED");
+
+        /// <summary>
+        /// Cannot send messages while task is in progress.
+        /// </summary>
+        public static string CannotMessageWhileRunning => FormatErrorCode(TaskDomain, "CANNOT_MESSAGE_WHILE_RUNNING");
     }
 }
